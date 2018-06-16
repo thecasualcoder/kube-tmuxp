@@ -4,3 +4,6 @@
 # Virtualenv
 venv
 
+# user configs
+configs
+!configs/sample.config

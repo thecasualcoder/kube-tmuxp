@@ -5,5 +5,4 @@
 venv
 
 # user configs
-configs
-!configs/sample.config
+config.yaml

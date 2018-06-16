@@ -1,0 +1,8 @@
+- project: gcp-project-id
+  clusters:
+    - name: gke-cluster-name
+      zone: zone
+      context: name-to-be-used-for-this-context
+      extra_envs:
+        ENV_VARIABLE: value
+

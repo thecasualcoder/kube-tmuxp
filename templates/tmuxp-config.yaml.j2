@@ -1,5 +1,6 @@
 environment:
   KUBECONFIG: {{kube_config}}
+  {% for key, value in extra_envs.items() %}{{key}}: {{value}}{% endfor %}
 session_name: {{session_name}}
 windows:
   - panes: []

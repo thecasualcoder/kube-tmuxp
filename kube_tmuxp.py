@@ -35,12 +35,12 @@ def rename_context(new_context_name, project_name, cluster_name, zone):
   cmd = "KUBECONFIG={0}/{1} kubectl config rename-context gke_{2}_{3}_{4} {1}".format(kubeconfigs_dir, new_context_name, project_name, zone, cluster_name)
   execute(cmd)
 
-def generate_tmuxp_config(context_name):
+def generate_tmuxp_config(context_name, extra_envs):
     context_file = os.path.join(kubeconfigs_dir, context_name)
     tmuxp_config_file = os.path.join(tmuxp_dir, "{0}.yaml".format(context_name))
     template_env = Environment(loader=FileSystemLoader(searchpath='./templates'))
     template = template_env.get_template('tmuxp-config.yaml.j2')
-    tmuxp_config = template.render(kube_config=context_file, session_name=context_name)
+    tmuxp_config = template.render(kube_config=context_file, session_name=context_name, extra_envs=extra_envs)
     with open(tmuxp_config_file, 'w') as f:
       f.write(tmuxp_config)
     print("\ntmuxp config generated: {0}".format(tmuxp_config_file))
@@ -59,7 +59,7 @@ def process(config_file):
       delete_context(cluster['context'])
       add_context(cluster['context'], config['project'], cluster['name'], cluster['zone'])
       rename_context(cluster['context'], config['project'], cluster['name'], cluster['zone'])
-      generate_tmuxp_config(cluster['context'])
+      generate_tmuxp_config(cluster['context'], cluster.get('extra_envs', {}))
 
 def init():
   os.makedirs(kubeconfigs_dir, exist_ok=True)

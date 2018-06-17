@@ -60,7 +60,7 @@ def process(config_file):
 
   for config in configs:
     for cluster in config['clusters']:
-      print("\n>>>>> Running for context: {0}\n".format(cluster['context']))
+      print("\n>>>>> Running for cluster: {0}\n".format(cluster['name']))
       if 'region' in cluster:
         regional = True
         location = cluster['region']

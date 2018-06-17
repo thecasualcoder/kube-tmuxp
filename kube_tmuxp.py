@@ -40,7 +40,7 @@ def generate_tmuxp_config(context_name, extra_envs):
     tmuxp_config_file = os.path.join(tmuxp_dir, "{0}.yaml".format(context_name))
     template_env = Environment(loader=FileSystemLoader(searchpath='./templates'))
     template = template_env.get_template('tmuxp-config.yaml.j2')
-    tmuxp_config = template.render(kube_config=context_file, session_name=context_name, extra_envs=extra_envs)
+    tmuxp_config = template.render(kubeconfig=context_file, session_name=context_name, extra_envs=extra_envs)
     with open(tmuxp_config_file, 'w') as f:
       f.write(tmuxp_config)
     print("\ntmuxp config generated: {0}".format(tmuxp_config_file))

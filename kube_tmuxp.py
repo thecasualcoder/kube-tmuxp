@@ -27,12 +27,12 @@ def delete_context(kubeconfig_filename):
     if e.errno != errno.ENOENT:
       raise
 
-def add_context(kubeconfig_filename, project_name, cluster_name, location, regional):
-  kubeconfig = os.path.join(kubeconfigs_dir, kubeconfig_filename)
-  if regional:
-    cmd = 'CLOUDSDK_CONTAINER_USE_V1_API_CLIENT=false CLOUDSDK_CONTAINER_USE_V1_API=false KUBECONFIG={kubeconfig} gcloud beta container clusters get-credentials {cluster_name} --region {location} --project {project_name}'.format(kubeconfig=kubeconfig, cluster_name=cluster_name, location=location, project_name=project_name)
+def add_context(is_regional_cluster, **kwargs):
+  kwargs['kubeconfig'] = os.path.join(kubeconfigs_dir, kwargs['context_name'])
+  if is_regional_cluster:
+    cmd = 'CLOUDSDK_CONTAINER_USE_V1_API_CLIENT=false CLOUDSDK_CONTAINER_USE_V1_API=false KUBECONFIG={kubeconfig} gcloud beta container clusters get-credentials {cluster_name} --region {location} --project {project_name}'.format(**kwargs)
   else:
-    cmd = 'KUBECONFIG={kubeconfig} gcloud container clusters get-credentials {cluster_name} --zone {location} --project {project_name}'.format(kubeconfig=kubeconfig, cluster_name=cluster_name, location=location, project_name=project_name)
+    cmd = 'KUBECONFIG={kubeconfig} gcloud container clusters get-credentials {cluster_name} --zone {location} --project {project_name}'.format(**kwargs)
 
   execute(cmd)
 
@@ -62,14 +62,14 @@ def process(config_file):
     for cluster in config['clusters']:
       print('\n>>>>> Running for cluster: {0}\n'.format(cluster['name']))
       if 'region' in cluster:
-        regional = True
+        is_regional_cluster = True
         location = cluster['region']
       else:
-        regional = False
+        is_regional_cluster = False
         location = cluster['zone']
 
       delete_context(cluster['context'])
-      add_context(cluster['context'], config['project'], cluster['name'], location, regional)
+      add_context(is_regional_cluster, context_name=cluster['context'], project_name=config['project'], cluster_name=cluster['name'], location=location)
       rename_context(cluster['context'], config['project'], cluster['name'], location)
       generate_tmuxp_config(cluster['context'], cluster.get('extra_envs', {}))
 

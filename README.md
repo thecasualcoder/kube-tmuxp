@@ -58,4 +58,3 @@ Now you will be inside a `tmux` session preconfigured with Kubernetes context `m
 ## Limitations
 
 * Generates kube configs for Kubernetes clusters (GKE) on Google Cloud Platform (GCP) only
-* Regional GKE clusters are not yet supported

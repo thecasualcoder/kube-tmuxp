@@ -36,8 +36,9 @@ def add_context(is_regional_cluster, **kwargs):
 
   execute(cmd)
 
-def rename_context(new_context_name, project_name, cluster_name, zone):
-  cmd = 'KUBECONFIG={0}/{1} kubectl config rename-context gke_{2}_{3}_{4} {1}'.format(kubeconfigs_dir, new_context_name, project_name, zone, cluster_name)
+def rename_context(**kwargs):
+  kwargs['kubeconfig'] = os.path.join(kubeconfigs_dir, kwargs['new_context_name'])
+  cmd = 'KUBECONFIG={kubeconfig} kubectl config rename-context gke_{project_name}_{location}_{cluster_name} {new_context_name}'.format(**kwargs)
   execute(cmd)
 
 def generate_tmuxp_config(context_name, extra_envs):
@@ -70,7 +71,7 @@ def process(config_file):
 
       delete_context(cluster['context'])
       add_context(is_regional_cluster, context_name=cluster['context'], project_name=config['project'], cluster_name=cluster['name'], location=location)
-      rename_context(cluster['context'], config['project'], cluster['name'], location)
+      rename_context(new_context_name=cluster['context'], project_name=config['project'], cluster_name=cluster['name'], location=location)
       generate_tmuxp_config(cluster['context'], cluster.get('extra_envs', {}))
 
 def init():

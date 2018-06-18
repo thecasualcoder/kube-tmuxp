@@ -44,7 +44,7 @@ The generated `tmuxp` configs are used to start preconfigured `tmux` sessions.
 * Generate kube configs and tmuxp configs
 
 ```
-python kube-tmuxp.py config.yaml
+python kube_tmuxp.py config.yaml
 ```
 
 ### Start a session

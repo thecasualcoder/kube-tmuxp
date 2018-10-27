@@ -26,6 +26,12 @@ The generated `tmuxp` configs are used to start preconfigured `tmux` sessions.
 
 ### Generate kube configs and `tmuxp` configs
 
+* Clone the repo
+
+  ```
+  git clone https://github.com/arunvelsriram/kube-tmuxp.git
+  ```
+
 * Setup `virtualenv`
 
   ```

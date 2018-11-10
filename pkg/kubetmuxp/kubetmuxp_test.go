@@ -5,17 +5,26 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/arunvelsriram/kube-tmuxp/pkg/filesystem"
+	"github.com/arunvelsriram/kube-tmuxp/pkg/internal/mock"
 	"github.com/arunvelsriram/kube-tmuxp/pkg/kubeconfig"
 	"github.com/arunvelsriram/kube-tmuxp/pkg/kubetmuxp"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNew(t *testing.T) {
-	var reader io.Reader
-	var fs filesystem.FileSystem
-	kubeCfg := kubeconfig.New(fs)
+func getKubeCfg(ctrl *gomock.Controller) kubeconfig.KubeConfig {
+	mockFS := mock.NewFileSystem(ctrl)
+	mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
+	kubeCfg, _ := kubeconfig.New(mockFS)
+	return kubeCfg
+}
 
+func TestNew(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	var reader io.Reader
+	kubeCfg := getKubeCfg(ctrl)
 	kubetmuxpCfg := kubetmuxp.New(reader, kubeCfg)
 
 	assert.NotNil(t, kubetmuxpCfg)
@@ -23,6 +32,9 @@ func TestNew(t *testing.T) {
 
 func TestLoadConfig(t *testing.T) {
 	t.Run("should load the config", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
 		content := `
 projects:
   - name: test-project
@@ -34,8 +46,7 @@ projects:
         envs:
           TEST_ENV: test-value`
 		reader := strings.NewReader(content)
-		var fs filesystem.FileSystem
-		kubeCfg := kubeconfig.New(fs)
+		kubeCfg := getKubeCfg(ctrl)
 		kubetmuxpCfg := kubetmuxp.New(reader, kubeCfg)
 
 		err := kubetmuxpCfg.Load()
@@ -62,9 +73,11 @@ projects:
 	})
 
 	t.Run("should return error if loading fails", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
 		reader := strings.NewReader("invalid yaml")
-		var fs filesystem.FileSystem
-		kubeCfg := kubeconfig.New(fs)
+		kubeCfg := getKubeCfg(ctrl)
 		kubetmuxpCfg := kubetmuxp.New(reader, kubeCfg)
 
 		err := kubetmuxpCfg.Load()

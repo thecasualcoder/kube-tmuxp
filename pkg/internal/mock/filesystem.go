@@ -43,3 +43,16 @@ func (m *FileSystem) Remove(file string) error {
 func (mr *FileSystemMockRecorder) Remove(file interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Remove", reflect.TypeOf((*FileSystem)(nil).Remove), file)
 }
+
+// HomeDir mocks base method
+func (m *FileSystem) HomeDir() (string, error) {
+	ret := m.ctrl.Call(m, "HomeDir")
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// HomeDir indicates an expected call of HomeDir
+func (mr *FileSystemMockRecorder) HomeDir() *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HomeDir", reflect.TypeOf((*FileSystem)(nil).HomeDir))
+}

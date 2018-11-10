@@ -21,9 +21,14 @@ var generateCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-
 		bufioReader := bufio.NewReader(reader)
-		kubeCfg := kubeconfig.New(filesystem.Default{})
+
+		kubeCfg, err := kubeconfig.New(filesystem.Default{})
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
 		kubetmuxpCfg := kubetmuxp.New(bufioReader, kubeCfg)
 		err = kubetmuxpCfg.Load()
 		if err != nil {

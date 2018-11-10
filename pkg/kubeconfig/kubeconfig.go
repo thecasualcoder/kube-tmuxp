@@ -1,12 +1,9 @@
 package kubeconfig
 
 import (
-	"fmt"
-	"os"
 	"path"
 
 	"github.com/arunvelsriram/kube-tmuxp/pkg/filesystem"
-	homedir "github.com/mitchellh/go-homedir"
 )
 
 // KubeConfig exposes methods to perform actions on kubeconfig
@@ -27,16 +24,15 @@ func (k *KubeConfig) Delete(context string) error {
 }
 
 // New returns a new KubeConfig
-func New(fs filesystem.FileSystem) KubeConfig {
-	home, err := homedir.Dir()
+func New(fs filesystem.FileSystem) (KubeConfig, error) {
+	home, err := fs.HomeDir()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return KubeConfig{}, err
 	}
 	kubeConfigsDir := path.Join(home, ".kube/configs")
 
 	return KubeConfig{
 		filesystem: fs,
 		dir:        kubeConfigsDir,
-	}
+	}, nil
 }

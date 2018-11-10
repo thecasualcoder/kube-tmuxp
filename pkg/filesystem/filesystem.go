@@ -1,10 +1,15 @@
 package filesystem
 
-import "os"
+import (
+	"os"
+
+	homedir "github.com/mitchellh/go-homedir"
+)
 
 // FileSystem represents a filesystem
 type FileSystem interface {
 	Remove(file string) error
+	HomeDir() (string, error)
 }
 
 // Default represents the Operating System's filesystem
@@ -17,4 +22,14 @@ func (Default) Remove(file string) error {
 	}
 
 	return nil
+}
+
+// HomeDir returns the home directory
+func (Default) HomeDir() (string, error) {
+	home, err := homedir.Dir()
+	if err != nil {
+		return home, err
+	}
+
+	return home, nil
 }

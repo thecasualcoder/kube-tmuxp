@@ -39,3 +39,6 @@ ifeq ($(RICHGO),)
 endif
 
 build: fmt vet compile ## build the application
+
+mocks: ## generate mocks for testing
+	./scripts/mocks

@@ -2,6 +2,7 @@ package kubeconfig_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/arunvelsriram/kube-tmuxp/pkg/internal/mock"
@@ -51,7 +52,21 @@ func TestDelete(t *testing.T) {
 		assert.Nil(t, err)
 	})
 
-	t.Run("should return error if kubeconfig file cannot be deleted", func(t *testing.T) {
+	t.Run("should skip error arises when deleting kubeconfig file that does not exist", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockFS := mock.NewFileSystem(ctrl)
+		mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
+		mockFS.EXPECT().Remove("/Users/test/.kube/configs/context-name").Return(&os.PathError{Op: "remove", Path: "/Users/test/.kube/configs/context-name", Err: os.ErrNotExist})
+
+		kubeCfg, _ := kubeconfig.New(mockFS)
+		err := kubeCfg.Delete("context-name")
+
+		assert.Nil(t, err)
+	})
+
+	t.Run("should return error if error occurs when deleting the kubeconfig file", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 

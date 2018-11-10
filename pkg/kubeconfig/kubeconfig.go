@@ -1,6 +1,7 @@
 package kubeconfig
 
 import (
+	"os"
 	"path"
 
 	"github.com/arunvelsriram/kube-tmuxp/pkg/filesystem"
@@ -16,7 +17,7 @@ type KubeConfig struct {
 func (k *KubeConfig) Delete(context string) error {
 	file := path.Join(k.dir, context)
 
-	if err := k.filesystem.Remove(file); err != nil {
+	if err := k.filesystem.Remove(file); err != nil && !os.IsNotExist(err) {
 		return err
 	}
 

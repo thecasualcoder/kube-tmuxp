@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/arunvelsriram/kube-tmuxp/pkg/kubetmuxp"
 	"github.com/spf13/cobra"
 )
 
@@ -11,7 +13,13 @@ var generateCmd = &cobra.Command{
 	Aliases: []string{"gen"},
 	Short:   "Generates tmuxp configs for various Kubernetes contexts",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Generate")
+		kubetmuxpCfg, err := kubetmuxp.NewConfig(cfgFile)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("%+v\n", kubetmuxpCfg)
 	},
 }
 

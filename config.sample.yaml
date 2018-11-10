@@ -1,9 +1,10 @@
-- project: gcp-project-id
-  clusters:
-    - name: gke-cluster-name
-      zone: zone # for zonal GKE clusters
-      region: region # for regional GKE clusters
-      context: name-to-be-used-for-this-context
-      extra_envs:
-        ENV_VARIABLE: value
+projects:
+  - name: gcp-project-id
+    clusters:
+      - name: gke-cluster-name
+        zone: zone # for zonal GKE clusters
+        region: region # for regional GKE clusters
+        context: name-to-be-used-for-this-context
+        envs:
+          ENV_VARIABLE: value
 

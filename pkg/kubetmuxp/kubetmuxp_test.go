@@ -5,15 +5,20 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/arunvelsriram/kube-tmuxp/pkg/filesystem"
+	"github.com/arunvelsriram/kube-tmuxp/pkg/kubeconfig"
 	"github.com/arunvelsriram/kube-tmuxp/pkg/kubetmuxp"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewConfig(t *testing.T) {
+func TestNew(t *testing.T) {
 	var reader io.Reader
-	cfg := kubetmuxp.NewConfig(reader)
+	var fs filesystem.FileSystem
+	kubeCfg := kubeconfig.New(fs)
 
-	assert.NotNil(t, cfg)
+	kubetmuxpCfg := kubetmuxp.New(reader, kubeCfg)
+
+	assert.NotNil(t, kubetmuxpCfg)
 }
 
 func TestLoadConfig(t *testing.T) {
@@ -29,9 +34,11 @@ projects:
         envs:
           TEST_ENV: test-value`
 		reader := strings.NewReader(content)
+		var fs filesystem.FileSystem
+		kubeCfg := kubeconfig.New(fs)
+		kubetmuxpCfg := kubetmuxp.New(reader, kubeCfg)
 
-		cfg := kubetmuxp.NewConfig(reader)
-		err := cfg.Load()
+		err := kubetmuxpCfg.Load()
 
 		expectedProjects := kubetmuxp.Projects{
 			{
@@ -51,16 +58,18 @@ projects:
 		}
 
 		assert.Nil(t, err)
-		assert.Equal(t, cfg.Projects, expectedProjects)
+		assert.Equal(t, kubetmuxpCfg.Projects, expectedProjects)
 	})
 
 	t.Run("should return error if loading fails", func(t *testing.T) {
 		reader := strings.NewReader("invalid yaml")
+		var fs filesystem.FileSystem
+		kubeCfg := kubeconfig.New(fs)
+		kubetmuxpCfg := kubetmuxp.New(reader, kubeCfg)
 
-		cfg := kubetmuxp.NewConfig(reader)
-		err := cfg.Load()
+		err := kubetmuxpCfg.Load()
 
 		assert.NotNil(t, err)
-		assert.Equal(t, cfg.Projects, kubetmuxp.Projects(nil))
+		assert.Equal(t, kubetmuxpCfg.Projects, kubetmuxp.Projects(nil))
 	})
 }

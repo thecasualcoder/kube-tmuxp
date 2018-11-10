@@ -23,10 +23,10 @@ func TestDelete(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		mockFS := mock.NewFileSystem(ctrl)
-		mockFS.EXPECT().Remove("kubeconfig.yaml").Return(nil)
+		mockFS.EXPECT().Remove("/Users/arunvelsriram/.kube/configs/context-name").Return(nil)
 
 		cfg := kubeconfig.New(mockFS)
-		err := cfg.Delete("kubeconfig.yaml")
+		err := cfg.Delete("context-name")
 
 		assert.Nil(t, err)
 	})
@@ -35,10 +35,10 @@ func TestDelete(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		mockFS := mock.NewFileSystem(ctrl)
-		mockFS.EXPECT().Remove("kubeconfig.yaml").Return(fmt.Errorf("some error"))
+		mockFS.EXPECT().Remove("/Users/arunvelsriram/.kube/configs/context-name").Return(fmt.Errorf("some error"))
 
 		cfg := kubeconfig.New(mockFS)
-		err := cfg.Delete("kubeconfig.yaml")
+		err := cfg.Delete("context-name")
 
 		assert.EqualError(t, err, "some error")
 	})

@@ -2,15 +2,16 @@ package filesystem
 
 import "os"
 
-// FileSystem abcd
+// FileSystem represents a filesystem
 type FileSystem interface {
 	Remove(file string) error
 }
 
-type defaultFS struct{}
+// Default represents the Operating System's filesystem
+type Default struct{}
 
-// Remove abcd
-func (d *defaultFS) Remove(file string) error {
+// Remove removes a file from Default filesystem
+func (Default) Remove(file string) error {
 	if err := os.Remove(file); err != nil {
 		return err
 	}

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/arunvelsriram/kube-tmuxp/pkg/filesystem"
+	"github.com/arunvelsriram/kube-tmuxp/pkg/kubeconfig"
 	"github.com/arunvelsriram/kube-tmuxp/pkg/kubetmuxp"
 	"github.com/spf13/cobra"
 )
@@ -20,14 +22,19 @@ var generateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		kubetmuxpCfg := kubetmuxp.NewConfig(bufio.NewReader(reader))
+		bufioReader := bufio.NewReader(reader)
+		kubeCfg := kubeconfig.New(filesystem.Default{})
+		kubetmuxpCfg := kubetmuxp.New(bufioReader, kubeCfg)
 		err = kubetmuxpCfg.Load()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		kubetmuxpCfg.Process()
+		if err = kubetmuxpCfg.Process(); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	},
 }
 

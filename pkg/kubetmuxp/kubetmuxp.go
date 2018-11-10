@@ -1,14 +1,14 @@
 package kubetmuxp
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 
+	"github.com/arunvelsriram/kube-tmuxp/pkg/kubeconfig"
 	yaml "gopkg.in/yaml.v2"
 )
 
-// Envs abcd
+// Envs reprensents environemnt variables
 type Envs map[string]string
 
 //Cluster represents a Kubernetes cluster
@@ -36,6 +36,7 @@ type Projects []Project
 type Config struct {
 	Projects `yaml:"projects"`
 	reader   io.Reader
+	kubeCfg  kubeconfig.KubeConfig
 }
 
 // Load constructs kube-tmuxp config from given file
@@ -57,16 +58,19 @@ func (c *Config) Load() error {
 func (c *Config) Process() error {
 	for _, project := range c.Projects {
 		for _, cluster := range project.Clusters {
-			fmt.Println(cluster)
+			if err := c.kubeCfg.Delete(cluster.Context); err != nil {
+				return err
+			}
 		}
 	}
 
 	return nil
 }
 
-// NewConfig creates a new Config
-func NewConfig(reader io.Reader) Config {
+// New creates a new kube-tmuxp Config
+func New(reader io.Reader, kubeCfg kubeconfig.KubeConfig) Config {
 	return Config{
-		reader: reader,
+		reader:  reader,
+		kubeCfg: kubeCfg,
 	}
 }

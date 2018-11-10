@@ -1,8 +1,8 @@
 # Vim
 *.swp
 
-# Virtualenv
-venv
+#Output
+out/
 
 # user configs
 config.yaml

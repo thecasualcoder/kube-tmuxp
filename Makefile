@@ -27,10 +27,10 @@ compile: ensure-out-dir ## compiles kube-tmuxp for this platform
 compile-linux: ensure-out-dir ## compiles kube-tmuxp for linux
 	GOOS=linux GOARCH=amd64 $(GOBIN) build -o $(APP_EXECUTABLE) ./main.go
 
-fmt: # format go code
+fmt: ## format go code
 	$(GOBIN) fmt $(SRC_PACKAGES)
 
-vet: # examine go code for suspicious constructs
+vet: ## examine go code for suspicious constructs
 	$(GOBIN) vet $(SRC_PACKAGES)
 
 setup: ## setup environment
@@ -42,3 +42,13 @@ build: fmt vet compile ## build the application
 
 mocks: ## generate mocks for testing
 	./scripts/mocks
+
+tests: ## run all tests
+	$(GOBIN) test $(SRC_PACKAGES) -p=1 -coverprofile ./out/coverage -v
+
+tests-cover-html: ensure-out-dir ## run all tests and generates coverage report in html
+	@echo "mode: count" > out/coverage-all.out
+	$(foreach pkg, $(SRC_PACKAGES),\
+	$(GOBIN) test -coverprofile=out/coverage.out -covermode=count $(pkg);\
+	tail -n +2 out/coverage.out >> out/coverage-all.out;)
+	$(GOBIN) tool cover -html=out/coverage-all.out -o out/coverage.html

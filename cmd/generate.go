@@ -27,7 +27,7 @@ var generateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		fmt.Printf("%+v\n", kubetmuxpCfg)
+		kubetmuxpCfg.Process()
 	},
 }
 

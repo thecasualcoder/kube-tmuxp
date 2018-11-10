@@ -1,6 +1,7 @@
 package kubetmuxp
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 
@@ -47,6 +48,17 @@ func (c *Config) Load() error {
 	err = yaml.Unmarshal(data, c)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// Process processes kube-tmuxp configs
+func (c *Config) Process() error {
+	for _, project := range c.Projects {
+		for _, cluster := range project.Clusters {
+			fmt.Println(cluster)
+		}
 	}
 
 	return nil

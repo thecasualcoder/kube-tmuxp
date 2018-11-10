@@ -7,8 +7,9 @@ import (
 )
 
 var generateCmd = &cobra.Command{
-	Use:   "generate",
-	Short: "Generates tmuxp configs for various Kubernetes contexts",
+	Use:     "generate",
+	Aliases: []string{"gen"},
+	Short:   "Generates tmuxp configs for various Kubernetes contexts",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Generate")
 	},

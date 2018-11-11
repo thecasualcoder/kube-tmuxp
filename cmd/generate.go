@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/arunvelsriram/kube-tmuxp/pkg/commander"
 	"github.com/arunvelsriram/kube-tmuxp/pkg/filesystem"
 	"github.com/arunvelsriram/kube-tmuxp/pkg/kubeconfig"
 	"github.com/arunvelsriram/kube-tmuxp/pkg/kubetmuxp"
@@ -23,7 +24,7 @@ var generateCmd = &cobra.Command{
 		}
 		bufioReader := bufio.NewReader(reader)
 
-		kubeCfg, err := kubeconfig.New(filesystem.Default{})
+		kubeCfg, err := kubeconfig.New(filesystem.Default{}, commander.Default{})
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

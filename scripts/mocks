@@ -3,3 +3,4 @@
 set -e
 
 mockgen -source=pkg/filesystem/filesystem.go -destination=pkg/internal/mock/filesystem.go -package=mock -mock_names=FileSystem=FileSystem
+mockgen -source=pkg/commander/commander.go -destination=pkg/internal/mock/commander.go -package=mock -mock_names=Commander=Commander

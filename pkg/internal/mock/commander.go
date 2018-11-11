@@ -33,14 +33,14 @@ func (m *Commander) EXPECT() *CommanderMockRecorder {
 }
 
 // Execute mocks base method
-func (m *Commander) Execute(cmd string, args []string) ([]string, error) {
-	ret := m.ctrl.Call(m, "Execute", cmd, args)
-	ret0, _ := ret[0].([]string)
+func (m *Commander) Execute(cmdStr string, args, envs []string) (string, error) {
+	ret := m.ctrl.Call(m, "Execute", cmdStr, args, envs)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *CommanderMockRecorder) Execute(cmd, args interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*Commander)(nil).Execute), cmd, args)
+func (mr *CommanderMockRecorder) Execute(cmdStr, args, envs interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*Commander)(nil).Execute), cmdStr, args, envs)
 }

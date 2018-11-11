@@ -13,9 +13,10 @@ import (
 )
 
 func getKubeCfg(ctrl *gomock.Controller) kubeconfig.KubeConfig {
+	mockCmdr := mock.NewCommander(ctrl)
 	mockFS := mock.NewFileSystem(ctrl)
 	mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
-	kubeCfg, _ := kubeconfig.New(mockFS)
+	kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
 	return kubeCfg
 }
 

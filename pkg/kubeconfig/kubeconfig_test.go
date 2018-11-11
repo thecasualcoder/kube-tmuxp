@@ -16,10 +16,11 @@ func TestNew(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockCmdr := mock.NewCommander(ctrl)
 		mockFS := mock.NewFileSystem(ctrl)
 		mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
 
-		kubeCfg, err := kubeconfig.New(mockFS)
+		kubeCfg, err := kubeconfig.New(mockFS, mockCmdr)
 
 		assert.Nil(t, err)
 		assert.NotNil(t, kubeCfg)
@@ -29,9 +30,10 @@ func TestNew(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockCmdr := mock.NewCommander(ctrl)
 		mockFS := mock.NewFileSystem(ctrl)
 		mockFS.EXPECT().HomeDir().Return("", fmt.Errorf("some error"))
-		_, err := kubeconfig.New(mockFS)
+		_, err := kubeconfig.New(mockFS, mockCmdr)
 
 		assert.EqualError(t, err, "some error")
 	})
@@ -42,11 +44,12 @@ func TestDelete(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockCmdr := mock.NewCommander(ctrl)
 		mockFS := mock.NewFileSystem(ctrl)
 		mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
 		mockFS.EXPECT().Remove("/Users/test/.kube/configs/context-name").Return(nil)
 
-		kubeCfg, _ := kubeconfig.New(mockFS)
+		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
 		err := kubeCfg.Delete("context-name")
 
 		assert.Nil(t, err)
@@ -56,11 +59,12 @@ func TestDelete(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockCmdr := mock.NewCommander(ctrl)
 		mockFS := mock.NewFileSystem(ctrl)
 		mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
 		mockFS.EXPECT().Remove("/Users/test/.kube/configs/context-name").Return(&os.PathError{Op: "remove", Path: "/Users/test/.kube/configs/context-name", Err: os.ErrNotExist})
 
-		kubeCfg, _ := kubeconfig.New(mockFS)
+		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
 		err := kubeCfg.Delete("context-name")
 
 		assert.Nil(t, err)
@@ -70,12 +74,75 @@ func TestDelete(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockCmdr := mock.NewCommander(ctrl)
 		mockFS := mock.NewFileSystem(ctrl)
 		mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
 		mockFS.EXPECT().Remove("/Users/test/.kube/configs/context-name").Return(fmt.Errorf("some error"))
 
-		kubeCfg, _ := kubeconfig.New(mockFS)
+		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
 		err := kubeCfg.Delete("context-name")
+
+		assert.EqualError(t, err, "some error")
+	})
+}
+
+func TestAddRegionalCluster(t *testing.T) {
+	t.Run("should invoke command for adding regional cluster", func(*testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockFS := mock.NewFileSystem(ctrl)
+		mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
+
+		mockCmdr := mock.NewCommander(ctrl)
+		args := []string{
+			"beta",
+			"container",
+			"clusters",
+			"get-credentials",
+			"test-cluster",
+			"--region=test-region",
+			"--project=test-project",
+		}
+		envs := []string{
+			"CLOUDSDK_CONTAINER_USE_V1_API_CLIENT=false",
+			"CLOUDSDK_CONTAINER_USE_V1_API=false",
+			"KUBECONFIG=/Users/test/.kube/configs/test-context",
+		}
+		mockCmdr.EXPECT().Execute("gcloud", args, envs).Return("Context added successfully", nil)
+
+		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
+		err := kubeCfg.AddRegionalCluster("test-project", "test-cluster", "test-region", "test-context")
+
+		assert.Nil(t, err)
+	})
+
+	t.Run("should return error if command failed to execute", func(*testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockFS := mock.NewFileSystem(ctrl)
+		mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
+
+		mockCmdr := mock.NewCommander(ctrl)
+		args := []string{
+			"beta",
+			"container",
+			"clusters",
+			"get-credentials",
+			"test-cluster",
+			"--region=test-region",
+			"--project=test-project",
+		}
+		envs := []string{
+			"CLOUDSDK_CONTAINER_USE_V1_API_CLIENT=false",
+			"CLOUDSDK_CONTAINER_USE_V1_API=false",
+			"KUBECONFIG=/Users/test/.kube/configs/test-context",
+		}
+		mockCmdr.EXPECT().Execute("gcloud", args, envs).Return("", fmt.Errorf("some error"))
+
+		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
+		err := kubeCfg.AddRegionalCluster("test-project", "test-cluster", "test-region", "test-context")
 
 		assert.EqualError(t, err, "some error")
 	})

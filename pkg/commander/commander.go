@@ -7,7 +7,7 @@ import (
 
 // Commander is an interface to execute commands
 type Commander interface {
-	Execute(cmd string, args []string) ([]string, error)
+	Execute(cmdStr string, args []string, envs []string) (string, error)
 }
 
 // Default is a Commander implementation that

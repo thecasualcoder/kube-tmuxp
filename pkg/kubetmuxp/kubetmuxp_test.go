@@ -70,7 +70,7 @@ projects:
 		}
 
 		assert.Nil(t, err)
-		assert.Equal(t, kubetmuxpCfg.Projects, expectedProjects)
+		assert.Equal(t, expectedProjects, kubetmuxpCfg.Projects)
 	})
 
 	t.Run("should return error if loading fails", func(t *testing.T) {
@@ -84,7 +84,7 @@ projects:
 		err := kubetmuxpCfg.Load()
 
 		assert.NotNil(t, err)
-		assert.Equal(t, kubetmuxpCfg.Projects, kubetmuxp.Projects(nil))
+		assert.Equal(t, kubetmuxp.Projects(nil), kubetmuxpCfg.Projects)
 	})
 }
 

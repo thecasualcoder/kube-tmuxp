@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"path"
 
 	"github.com/arunvelsriram/kube-tmuxp/pkg/kubeconfig"
 	yaml "gopkg.in/yaml.v2"
@@ -70,11 +71,14 @@ func (c *Config) Load() error {
 
 // Process processes kube-tmuxp configs
 func (c *Config) Process() error {
+	kubeCfgsDir := c.kubeCfg.KubeCfgsDir()
 	for _, project := range c.Projects {
 		for _, cluster := range project.Clusters {
+			kubeCfgFile := path.Join(kubeCfgsDir, cluster.Context)
+
 			fmt.Printf("Cluster: %s\n", cluster.Name)
 			fmt.Println("Deleting exisiting context...")
-			if err := c.kubeCfg.Delete(cluster.Context); err != nil {
+			if err := c.kubeCfg.Delete(kubeCfgFile); err != nil {
 				return err
 			}
 
@@ -82,9 +86,9 @@ func (c *Config) Process() error {
 			if regional, err := cluster.Regional(); err != nil {
 				return err
 			} else if regional {
-				c.kubeCfg.AddRegionalCluster(project.Name, cluster.Name, cluster.Region, cluster.Context)
+				c.kubeCfg.AddRegionalCluster(project.Name, cluster.Name, cluster.Region, kubeCfgFile)
 			} else {
-				c.kubeCfg.AddZonalCluster(project.Name, cluster.Name, cluster.Zone, cluster.Context)
+				c.kubeCfg.AddZonalCluster(project.Name, cluster.Name, cluster.Zone, kubeCfgFile)
 			}
 
 			fmt.Println("")

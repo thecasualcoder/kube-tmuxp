@@ -50,7 +50,7 @@ func TestDelete(t *testing.T) {
 		mockFS.EXPECT().Remove("/Users/test/.kube/configs/context-name").Return(nil)
 
 		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
-		err := kubeCfg.Delete("context-name")
+		err := kubeCfg.Delete("/Users/test/.kube/configs/context-name")
 
 		assert.Nil(t, err)
 	})
@@ -65,7 +65,7 @@ func TestDelete(t *testing.T) {
 		mockFS.EXPECT().Remove("/Users/test/.kube/configs/context-name").Return(&os.PathError{Op: "remove", Path: "/Users/test/.kube/configs/context-name", Err: os.ErrNotExist})
 
 		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
-		err := kubeCfg.Delete("context-name")
+		err := kubeCfg.Delete("/Users/test/.kube/configs/context-name")
 
 		assert.Nil(t, err)
 	})
@@ -80,7 +80,7 @@ func TestDelete(t *testing.T) {
 		mockFS.EXPECT().Remove("/Users/test/.kube/configs/context-name").Return(fmt.Errorf("some error"))
 
 		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
-		err := kubeCfg.Delete("context-name")
+		err := kubeCfg.Delete("/Users/test/.kube/configs/context-name")
 
 		assert.EqualError(t, err, "some error")
 	})
@@ -112,7 +112,7 @@ func TestAddRegionalCluster(t *testing.T) {
 		mockCmdr.EXPECT().Execute("gcloud", args, envs).Return("Context added successfully", nil)
 
 		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
-		err := kubeCfg.AddRegionalCluster("test-project", "test-cluster", "test-region", "test-context")
+		err := kubeCfg.AddRegionalCluster("test-project", "test-cluster", "test-region", "/Users/test/.kube/configs/test-context")
 
 		assert.Nil(t, err)
 	})
@@ -142,7 +142,7 @@ func TestAddRegionalCluster(t *testing.T) {
 		mockCmdr.EXPECT().Execute("gcloud", args, envs).Return("", fmt.Errorf("some error"))
 
 		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
-		err := kubeCfg.AddRegionalCluster("test-project", "test-cluster", "test-region", "test-context")
+		err := kubeCfg.AddRegionalCluster("test-project", "test-cluster", "test-region", "/Users/test/.kube/configs/test-context")
 
 		assert.EqualError(t, err, "some error")
 	})
@@ -171,7 +171,7 @@ func TestAddZonalCluster(t *testing.T) {
 		mockCmdr.EXPECT().Execute("gcloud", args, envs).Return("Context added successfully", nil)
 
 		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
-		err := kubeCfg.AddZonalCluster("test-project", "test-cluster", "test-zone", "test-context")
+		err := kubeCfg.AddZonalCluster("test-project", "test-cluster", "test-zone", "/Users/test/.kube/configs/test-context")
 
 		assert.Nil(t, err)
 	})
@@ -198,7 +198,7 @@ func TestAddZonalCluster(t *testing.T) {
 		mockCmdr.EXPECT().Execute("gcloud", args, envs).Return("", fmt.Errorf("some error"))
 
 		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
-		err := kubeCfg.AddZonalCluster("test-project", "test-cluster", "test-zone", "test-context")
+		err := kubeCfg.AddZonalCluster("test-project", "test-cluster", "test-zone", "/Users/test/.kube/configs/test-context")
 
 		assert.EqualError(t, err, "some error")
 	})
@@ -225,7 +225,7 @@ func TestRenameContext(t *testing.T) {
 		mockCmdr.EXPECT().Execute("kubectl", args, envs).Return("Context renamed", nil)
 
 		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
-		err := kubeCfg.RenameContext("old-context-name", "new-context-name")
+		err := kubeCfg.RenameContext("old-context-name", "new-context-name", "/Users/test/.kube/configs/new-context-name")
 
 		assert.Nil(t, err)
 	})
@@ -250,7 +250,7 @@ func TestRenameContext(t *testing.T) {
 		mockCmdr.EXPECT().Execute("kubectl", args, envs).Return("", fmt.Errorf("some error"))
 
 		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
-		err := kubeCfg.RenameContext("old-context-name", "new-context-name")
+		err := kubeCfg.RenameContext("old-context-name", "new-context-name", "/Users/test/.kube/configs/new-context-name")
 
 		assert.EqualError(t, err, "some error")
 	})

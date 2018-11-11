@@ -17,10 +17,8 @@ type KubeConfig struct {
 }
 
 // Delete deletes the kubeconfig file for the given context
-func (k KubeConfig) Delete(context string) error {
-	file := path.Join(k.kubeCfgsDir, context)
-
-	if err := k.filesystem.Remove(file); err != nil && !os.IsNotExist(err) {
+func (k KubeConfig) Delete(kubeCfgFile string) error {
+	if err := k.filesystem.Remove(kubeCfgFile); err != nil && !os.IsNotExist(err) {
 		return err
 	}
 
@@ -29,8 +27,7 @@ func (k KubeConfig) Delete(context string) error {
 
 // AddRegionalCluster imports Kubernetes context for
 // regional Kubernetes cluster
-func (k KubeConfig) AddRegionalCluster(project string, cluster string, region string, context string) error {
-	kubeCfgFile := path.Join(k.kubeCfgsDir, context)
+func (k KubeConfig) AddRegionalCluster(project string, cluster string, region string, kubeCfgFile string) error {
 	args := []string{
 		"beta",
 		"container",
@@ -54,8 +51,7 @@ func (k KubeConfig) AddRegionalCluster(project string, cluster string, region st
 
 // AddZonalCluster imports Kubernetes context for
 // zonal Kubernetes cluster
-func (k KubeConfig) AddZonalCluster(project string, cluster string, zone string, context string) error {
-	kubeCfgFile := path.Join(k.kubeCfgsDir, context)
+func (k KubeConfig) AddZonalCluster(project string, cluster string, zone string, kubeCfgFile string) error {
 	args := []string{
 		"container",
 		"clusters",
@@ -75,8 +71,7 @@ func (k KubeConfig) AddZonalCluster(project string, cluster string, zone string,
 }
 
 // RenameContext renames a Kubernetes context
-func (k KubeConfig) RenameContext(oldCtx string, newCtx string) error {
-	kubeCfgFile := path.Join(k.kubeCfgsDir, newCtx)
+func (k KubeConfig) RenameContext(oldCtx string, newCtx string, kubeCfgFile string) error {
 	args := []string{
 		"config",
 		"rename-context",

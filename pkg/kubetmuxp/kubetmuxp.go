@@ -22,8 +22,19 @@ type Cluster struct {
 	Envs    `yaml:"envs"`
 }
 
-// Regional tells if a cluster is a regional cluster
-func (c Cluster) Regional() (bool, error) {
+// DefaultContextName returns default context name
+func (c Cluster) DefaultContextName(project string) (string, error) {
+	if regional, err := c.IsRegional(); err != nil {
+		return "", err
+	} else if regional {
+		return fmt.Sprintf("gke_%s_%s_%s", project, c.Region, c.Name), nil
+	} else {
+		return fmt.Sprintf("gke_%s_%s_%s", project, c.Zone, c.Name), nil
+	}
+}
+
+// IsRegional tells if a cluster is a regional cluster
+func (c Cluster) IsRegional() (bool, error) {
 	if c.Region != "" && c.Zone != "" {
 		return false, fmt.Errorf("Only one of region or zone should be given")
 	}
@@ -70,7 +81,7 @@ func (c *Config) Load() error {
 }
 
 // Process processes kube-tmuxp configs
-func (c *Config) Process() error {
+func (c Config) Process() error {
 	kubeCfgsDir := c.kubeCfg.KubeCfgsDir()
 	for _, project := range c.Projects {
 		for _, cluster := range project.Clusters {
@@ -83,13 +94,15 @@ func (c *Config) Process() error {
 			}
 
 			fmt.Println("Adding context...")
-			if regional, err := cluster.Regional(); err != nil {
+			if regional, err := cluster.IsRegional(); err != nil {
 				return err
 			} else if regional {
 				c.kubeCfg.AddRegionalCluster(project.Name, cluster.Name, cluster.Region, kubeCfgFile)
 			} else {
 				c.kubeCfg.AddZonalCluster(project.Name, cluster.Name, cluster.Zone, kubeCfgFile)
 			}
+
+			fmt.Println("Renaming context...")
 
 			fmt.Println("")
 		}

@@ -88,14 +88,14 @@ projects:
 	})
 }
 
-func TestRegional(t *testing.T) {
+func TestIsRegional(t *testing.T) {
 	t.Run("should return true when region alone is given", func(t *testing.T) {
 		cluster := kubetmuxp.Cluster{
 			Name:   "test",
 			Region: "test-region",
 		}
 
-		regional, err := cluster.Regional()
+		regional, err := cluster.IsRegional()
 
 		assert.Nil(t, err)
 		assert.True(t, regional)
@@ -107,7 +107,7 @@ func TestRegional(t *testing.T) {
 			Zone: "test-zone",
 		}
 
-		regional, err := cluster.Regional()
+		regional, err := cluster.IsRegional()
 
 		assert.Nil(t, err)
 		assert.False(t, regional)
@@ -120,7 +120,45 @@ func TestRegional(t *testing.T) {
 			Zone:   "test-zone",
 		}
 
-		_, err := cluster.Regional()
+		_, err := cluster.IsRegional()
+
+		assert.EqualError(t, err, "Only one of region or zone should be given")
+	})
+}
+
+func TestGeneratedContextName(t *testing.T) {
+	t.Run("should return default context name for regional cluster", func(t *testing.T) {
+		cluster := kubetmuxp.Cluster{
+			Name:   "test-cluster",
+			Region: "test-region",
+		}
+
+		name, err := cluster.DefaultContextName("test-project")
+
+		assert.Nil(t, err)
+		assert.Equal(t, "gke_test-project_test-region_test-cluster", name)
+	})
+
+	t.Run("should return default context name for zonal cluster", func(t *testing.T) {
+		cluster := kubetmuxp.Cluster{
+			Name: "test-cluster",
+			Zone: "test-zone",
+		}
+
+		name, err := cluster.DefaultContextName("test-project")
+
+		assert.Nil(t, err)
+		assert.Equal(t, "gke_test-project_test-zone_test-cluster", name)
+	})
+
+	t.Run("should return error if cluster type (regional or zonal) cannot be determined", func(t *testing.T) {
+		cluster := kubetmuxp.Cluster{
+			Name:   "test-cluster",
+			Region: "test-region",
+			Zone:   "test-zone",
+		}
+
+		_, err := cluster.DefaultContextName("test-project")
 
 		assert.EqualError(t, err, "Only one of region or zone should be given")
 	})

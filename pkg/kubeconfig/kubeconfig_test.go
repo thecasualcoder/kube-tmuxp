@@ -147,3 +147,59 @@ func TestAddRegionalCluster(t *testing.T) {
 		assert.EqualError(t, err, "some error")
 	})
 }
+
+func TestAddZonalCluster(t *testing.T) {
+	t.Run("should invoke command for adding zonal cluster", func(*testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockFS := mock.NewFileSystem(ctrl)
+		mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
+
+		mockCmdr := mock.NewCommander(ctrl)
+		args := []string{
+			"container",
+			"clusters",
+			"get-credentials",
+			"test-cluster",
+			"--zone=test-zone",
+			"--project=test-project",
+		}
+		envs := []string{
+			"KUBECONFIG=/Users/test/.kube/configs/test-context",
+		}
+		mockCmdr.EXPECT().Execute("gcloud", args, envs).Return("Context added successfully", nil)
+
+		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
+		err := kubeCfg.AddZonalCluster("test-project", "test-cluster", "test-zone", "test-context")
+
+		assert.Nil(t, err)
+	})
+
+	t.Run("should return error if command failed to execute", func(*testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockFS := mock.NewFileSystem(ctrl)
+		mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
+
+		mockCmdr := mock.NewCommander(ctrl)
+		args := []string{
+			"container",
+			"clusters",
+			"get-credentials",
+			"test-cluster",
+			"--zone=test-zone",
+			"--project=test-project",
+		}
+		envs := []string{
+			"KUBECONFIG=/Users/test/.kube/configs/test-context",
+		}
+		mockCmdr.EXPECT().Execute("gcloud", args, envs).Return("", fmt.Errorf("some error"))
+
+		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
+		err := kubeCfg.AddZonalCluster("test-project", "test-cluster", "test-zone", "test-context")
+
+		assert.EqualError(t, err, "some error")
+	})
+}

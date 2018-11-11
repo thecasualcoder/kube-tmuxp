@@ -57,7 +57,26 @@ func (k KubeConfig) AddRegionalCluster(project string, cluster string, region st
 
 // AddZonalCluster imports Kubernetes context for
 // zonal Kubernetes cluster
-func AddZonalCluster(project string, cluster string, zone string, context string) error {
+func (k KubeConfig) AddZonalCluster(project string, cluster string, zone string, context string) error {
+	kubeconfig := path.Join(k.dir, context)
+	envs := []string{
+		fmt.Sprintf("KUBECONFIG=%s", kubeconfig),
+	}
+	args := []string{
+		"container",
+		"clusters",
+		"get-credentials",
+		cluster,
+		fmt.Sprintf("--zone=%s", zone),
+		fmt.Sprintf("--project=%s", project),
+	}
+	out, err := k.commander.Execute("gcloud", args, envs)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(out)
+
 	return nil
 }
 

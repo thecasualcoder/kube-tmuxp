@@ -45,12 +45,10 @@ func (k KubeConfig) AddRegionalCluster(project string, cluster string, region st
 		fmt.Sprintf("--region=%s", region),
 		fmt.Sprintf("--project=%s", project),
 	}
-	out, err := k.commander.Execute("gcloud", args, envs)
+	_, err := k.commander.Execute("gcloud", args, envs)
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(out)
 
 	return nil
 }
@@ -70,12 +68,10 @@ func (k KubeConfig) AddZonalCluster(project string, cluster string, zone string,
 		fmt.Sprintf("--zone=%s", zone),
 		fmt.Sprintf("--project=%s", project),
 	}
-	out, err := k.commander.Execute("gcloud", args, envs)
+	_, err := k.commander.Execute("gcloud", args, envs)
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(out)
 
 	return nil
 }

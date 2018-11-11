@@ -1,6 +1,7 @@
 package kubetmuxp
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 
@@ -18,6 +19,19 @@ type Cluster struct {
 	Region  string `yaml:"region"`
 	Context string `yaml:"context"`
 	Envs    `yaml:"envs"`
+}
+
+// Regional tells if a cluster is a regional cluster
+func (c Cluster) Regional() (bool, error) {
+	if c.Region != "" && c.Zone != "" {
+		return false, fmt.Errorf("Only one of region or zone should be given")
+	}
+
+	if c.Region != "" && c.Zone == "" {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 // Clusters represents a list of Kubernetes clusters
@@ -58,9 +72,22 @@ func (c *Config) Load() error {
 func (c *Config) Process() error {
 	for _, project := range c.Projects {
 		for _, cluster := range project.Clusters {
+			fmt.Printf("Cluster: %s\n", cluster.Name)
+			fmt.Println("Deleting exisiting context...")
 			if err := c.kubeCfg.Delete(cluster.Context); err != nil {
 				return err
 			}
+
+			fmt.Println("Adding context...")
+			if regional, err := cluster.Regional(); err != nil {
+				return err
+			} else if regional {
+				c.kubeCfg.AddRegionalCluster(project.Name, cluster.Name, cluster.Region, cluster.Context)
+			} else {
+				c.kubeCfg.AddZonalCluster(project.Name, cluster.Name, cluster.Zone, cluster.Context)
+			}
+
+			fmt.Println("")
 		}
 	}
 

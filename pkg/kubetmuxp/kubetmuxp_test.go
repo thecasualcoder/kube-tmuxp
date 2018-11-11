@@ -87,3 +87,41 @@ projects:
 		assert.Equal(t, kubetmuxpCfg.Projects, kubetmuxp.Projects(nil))
 	})
 }
+
+func TestRegional(t *testing.T) {
+	t.Run("should return true when region alone is given", func(t *testing.T) {
+		cluster := kubetmuxp.Cluster{
+			Name:   "test",
+			Region: "test-region",
+		}
+
+		regional, err := cluster.Regional()
+
+		assert.Nil(t, err)
+		assert.True(t, regional)
+	})
+
+	t.Run("should return false when zone alone is given", func(t *testing.T) {
+		cluster := kubetmuxp.Cluster{
+			Name: "test",
+			Zone: "test-zone",
+		}
+
+		regional, err := cluster.Regional()
+
+		assert.Nil(t, err)
+		assert.False(t, regional)
+	})
+
+	t.Run("should return error when both region and zone are given", func(t *testing.T) {
+		cluster := kubetmuxp.Cluster{
+			Name:   "test",
+			Region: "test-region",
+			Zone:   "test-zone",
+		}
+
+		_, err := cluster.Regional()
+
+		assert.EqualError(t, err, "Only one of region or zone should be given")
+	})
+}

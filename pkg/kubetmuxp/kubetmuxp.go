@@ -103,6 +103,11 @@ func (c Config) Process() error {
 			}
 
 			fmt.Println("Renaming context...")
+			defaultCtxName, err := cluster.DefaultContextName(project.Name)
+			if err != nil {
+				return err
+			}
+			c.kubeCfg.RenameContext(defaultCtxName, cluster.Context, kubeCfgFile)
 
 			fmt.Println("")
 		}

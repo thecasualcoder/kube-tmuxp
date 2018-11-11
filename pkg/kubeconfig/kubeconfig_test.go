@@ -203,3 +203,55 @@ func TestAddZonalCluster(t *testing.T) {
 		assert.EqualError(t, err, "some error")
 	})
 }
+
+func TestRenameContext(t *testing.T) {
+	t.Run("should rename a context", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockFS := mock.NewFileSystem(ctrl)
+		mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
+
+		mockCmdr := mock.NewCommander(ctrl)
+		args := []string{
+			"config",
+			"rename-context",
+			"old-context-name",
+			"new-context-name",
+		}
+		envs := []string{
+			"KUBECONFIG=/Users/test/.kube/configs/new-context-name",
+		}
+		mockCmdr.EXPECT().Execute("kubectl", args, envs).Return("Context renamed", nil)
+
+		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
+		err := kubeCfg.RenameContext("old-context-name", "new-context-name")
+
+		assert.Nil(t, err)
+	})
+
+	t.Run("should return error if renaming context fails", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockFS := mock.NewFileSystem(ctrl)
+		mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
+
+		mockCmdr := mock.NewCommander(ctrl)
+		args := []string{
+			"config",
+			"rename-context",
+			"old-context-name",
+			"new-context-name",
+		}
+		envs := []string{
+			"KUBECONFIG=/Users/test/.kube/configs/new-context-name",
+		}
+		mockCmdr.EXPECT().Execute("kubectl", args, envs).Return("", fmt.Errorf("some error"))
+
+		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
+		err := kubeCfg.RenameContext("old-context-name", "new-context-name")
+
+		assert.EqualError(t, err, "some error")
+	})
+}

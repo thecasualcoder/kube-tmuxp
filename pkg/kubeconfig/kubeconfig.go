@@ -31,11 +31,6 @@ func (k KubeConfig) Delete(context string) error {
 // regional Kubernetes cluster
 func (k KubeConfig) AddRegionalCluster(project string, cluster string, region string, context string) error {
 	kubeconfig := path.Join(k.dir, context)
-	envs := []string{
-		"CLOUDSDK_CONTAINER_USE_V1_API_CLIENT=false",
-		"CLOUDSDK_CONTAINER_USE_V1_API=false",
-		fmt.Sprintf("KUBECONFIG=%s", kubeconfig),
-	}
 	args := []string{
 		"beta",
 		"container",
@@ -45,8 +40,12 @@ func (k KubeConfig) AddRegionalCluster(project string, cluster string, region st
 		fmt.Sprintf("--region=%s", region),
 		fmt.Sprintf("--project=%s", project),
 	}
-	_, err := k.commander.Execute("gcloud", args, envs)
-	if err != nil {
+	envs := []string{
+		"CLOUDSDK_CONTAINER_USE_V1_API_CLIENT=false",
+		"CLOUDSDK_CONTAINER_USE_V1_API=false",
+		fmt.Sprintf("KUBECONFIG=%s", kubeconfig),
+	}
+	if _, err := k.commander.Execute("gcloud", args, envs); err != nil {
 		return err
 	}
 
@@ -57,9 +56,6 @@ func (k KubeConfig) AddRegionalCluster(project string, cluster string, region st
 // zonal Kubernetes cluster
 func (k KubeConfig) AddZonalCluster(project string, cluster string, zone string, context string) error {
 	kubeconfig := path.Join(k.dir, context)
-	envs := []string{
-		fmt.Sprintf("KUBECONFIG=%s", kubeconfig),
-	}
 	args := []string{
 		"container",
 		"clusters",
@@ -68,8 +64,29 @@ func (k KubeConfig) AddZonalCluster(project string, cluster string, zone string,
 		fmt.Sprintf("--zone=%s", zone),
 		fmt.Sprintf("--project=%s", project),
 	}
-	_, err := k.commander.Execute("gcloud", args, envs)
-	if err != nil {
+	envs := []string{
+		fmt.Sprintf("KUBECONFIG=%s", kubeconfig),
+	}
+	if _, err := k.commander.Execute("gcloud", args, envs); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// RenameContext renames a Kubernetes context
+func (k KubeConfig) RenameContext(oldCtx string, newCtx string) error {
+	kubeconfig := path.Join(k.dir, newCtx)
+	args := []string{
+		"config",
+		"rename-context",
+		oldCtx,
+		newCtx,
+	}
+	envs := []string{
+		fmt.Sprintf("KUBECONFIG=%s", kubeconfig),
+	}
+	if _, err := k.commander.Execute("kubectl", args, envs); err != nil {
 		return err
 	}
 

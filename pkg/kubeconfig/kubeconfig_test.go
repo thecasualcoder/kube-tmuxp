@@ -255,3 +255,20 @@ func TestRenameContext(t *testing.T) {
 		assert.EqualError(t, err, "some error")
 	})
 }
+
+func TestKubeCfgsDir(t *testing.T) {
+	t.Run("should return the directory in which kube configs are stored", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockFS := mock.NewFileSystem(ctrl)
+		mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
+
+		mockCmdr := mock.NewCommander(ctrl)
+
+		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
+		dir := kubeCfg.KubeCfgsDir()
+
+		assert.Equal(t, "/Users/test/.kube/configs", dir)
+	})
+}

@@ -11,14 +11,14 @@ import (
 
 // KubeConfig exposes methods to perform actions on kubeconfig
 type KubeConfig struct {
-	filesystem filesystem.FileSystem
-	commander  commander.Commander
-	dir        string
+	filesystem  filesystem.FileSystem
+	commander   commander.Commander
+	kubeCfgsDir string
 }
 
 // Delete deletes the kubeconfig file for the given context
 func (k KubeConfig) Delete(context string) error {
-	file := path.Join(k.dir, context)
+	file := path.Join(k.kubeCfgsDir, context)
 
 	if err := k.filesystem.Remove(file); err != nil && !os.IsNotExist(err) {
 		return err
@@ -30,7 +30,7 @@ func (k KubeConfig) Delete(context string) error {
 // AddRegionalCluster imports Kubernetes context for
 // regional Kubernetes cluster
 func (k KubeConfig) AddRegionalCluster(project string, cluster string, region string, context string) error {
-	kubeconfig := path.Join(k.dir, context)
+	kubeCfgFile := path.Join(k.kubeCfgsDir, context)
 	args := []string{
 		"beta",
 		"container",
@@ -43,7 +43,7 @@ func (k KubeConfig) AddRegionalCluster(project string, cluster string, region st
 	envs := []string{
 		"CLOUDSDK_CONTAINER_USE_V1_API_CLIENT=false",
 		"CLOUDSDK_CONTAINER_USE_V1_API=false",
-		fmt.Sprintf("KUBECONFIG=%s", kubeconfig),
+		fmt.Sprintf("KUBECONFIG=%s", kubeCfgFile),
 	}
 	if _, err := k.commander.Execute("gcloud", args, envs); err != nil {
 		return err
@@ -55,7 +55,7 @@ func (k KubeConfig) AddRegionalCluster(project string, cluster string, region st
 // AddZonalCluster imports Kubernetes context for
 // zonal Kubernetes cluster
 func (k KubeConfig) AddZonalCluster(project string, cluster string, zone string, context string) error {
-	kubeconfig := path.Join(k.dir, context)
+	kubeCfgFile := path.Join(k.kubeCfgsDir, context)
 	args := []string{
 		"container",
 		"clusters",
@@ -65,7 +65,7 @@ func (k KubeConfig) AddZonalCluster(project string, cluster string, zone string,
 		fmt.Sprintf("--project=%s", project),
 	}
 	envs := []string{
-		fmt.Sprintf("KUBECONFIG=%s", kubeconfig),
+		fmt.Sprintf("KUBECONFIG=%s", kubeCfgFile),
 	}
 	if _, err := k.commander.Execute("gcloud", args, envs); err != nil {
 		return err
@@ -76,7 +76,7 @@ func (k KubeConfig) AddZonalCluster(project string, cluster string, zone string,
 
 // RenameContext renames a Kubernetes context
 func (k KubeConfig) RenameContext(oldCtx string, newCtx string) error {
-	kubeconfig := path.Join(k.dir, newCtx)
+	kubeCfgFile := path.Join(k.kubeCfgsDir, newCtx)
 	args := []string{
 		"config",
 		"rename-context",
@@ -84,13 +84,18 @@ func (k KubeConfig) RenameContext(oldCtx string, newCtx string) error {
 		newCtx,
 	}
 	envs := []string{
-		fmt.Sprintf("KUBECONFIG=%s", kubeconfig),
+		fmt.Sprintf("KUBECONFIG=%s", kubeCfgFile),
 	}
 	if _, err := k.commander.Execute("kubectl", args, envs); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// KubeCfgsDir returns the directory in which kube configs are stored
+func (k KubeConfig) KubeCfgsDir() string {
+	return k.kubeCfgsDir
 }
 
 // New returns a new KubeConfig
@@ -102,8 +107,8 @@ func New(fs filesystem.FileSystem, cmdr commander.Commander) (KubeConfig, error)
 	kubeConfigsDir := path.Join(home, ".kube/configs")
 
 	return KubeConfig{
-		filesystem: fs,
-		commander:  cmdr,
-		dir:        kubeConfigsDir,
+		filesystem:  fs,
+		commander:   cmdr,
+		kubeCfgsDir: kubeConfigsDir,
 	}, nil
 }

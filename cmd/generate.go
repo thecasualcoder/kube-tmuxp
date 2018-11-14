@@ -24,7 +24,7 @@ var generateCmd = &cobra.Command{
 		}
 		bufioReader := bufio.NewReader(reader)
 
-		kubeCfg, err := kubeconfig.New(filesystem.Default{}, commander.Default{})
+		kubeCfg, err := kubeconfig.New(&filesystem.Default{}, &commander.Default{})
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

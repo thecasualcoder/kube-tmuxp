@@ -23,7 +23,7 @@ type Cluster struct {
 }
 
 // DefaultContextName returns default context name
-func (c Cluster) DefaultContextName(project string) (string, error) {
+func (c *Cluster) DefaultContextName(project string) (string, error) {
 	if regional, err := c.IsRegional(); err != nil {
 		return "", err
 	} else if regional {
@@ -34,7 +34,7 @@ func (c Cluster) DefaultContextName(project string) (string, error) {
 }
 
 // IsRegional tells if a cluster is a regional cluster
-func (c Cluster) IsRegional() (bool, error) {
+func (c *Cluster) IsRegional() (bool, error) {
 	if c.Region != "" && c.Zone != "" {
 		return false, fmt.Errorf("Only one of region or zone should be given")
 	}
@@ -81,7 +81,7 @@ func (c *Config) Load() error {
 }
 
 // Process processes kube-tmuxp configs
-func (c Config) Process() error {
+func (c *Config) Process() error {
 	kubeCfgsDir := c.kubeCfg.KubeCfgsDir()
 	for _, project := range c.Projects {
 		for _, cluster := range project.Clusters {

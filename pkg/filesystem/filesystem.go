@@ -16,7 +16,7 @@ type FileSystem interface {
 type Default struct{}
 
 // Remove removes a file from Default filesystem
-func (Default) Remove(file string) error {
+func (d *Default) Remove(file string) error {
 	if err := os.Remove(file); err != nil {
 		return err
 	}
@@ -25,7 +25,7 @@ func (Default) Remove(file string) error {
 }
 
 // HomeDir returns the home directory
-func (Default) HomeDir() (string, error) {
+func (d *Default) HomeDir() (string, error) {
 	home, err := homedir.Dir()
 	if err != nil {
 		return home, err

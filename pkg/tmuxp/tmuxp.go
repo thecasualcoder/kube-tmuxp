@@ -4,12 +4,13 @@ import (
 	"path"
 
 	"github.com/arunvelsriram/kube-tmuxp/pkg/filesystem"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // Window represents a window in a tmux session
 type Window struct {
-	Name  string
-	Panes []struct{}
+	Name  string     `yaml:"window_name"`
+	Panes []struct{} `yaml:"panes"`
 }
 
 // Windows represents a list of windows in a tmux session
@@ -20,9 +21,9 @@ type Environment map[string]string
 
 // Config represents tmuxp config
 type Config struct {
-	SessionName string
-	Windows
-	Environment
+	SessionName  string `yaml:"session_name"`
+	Windows      `yaml:"windows"`
+	Environment  `yaml:"environment"`
 	filesystem   filesystem.FileSystem
 	tmuxpCfgsDir string
 }
@@ -31,6 +32,24 @@ type Config struct {
 // configs are stored
 func (c *Config) TmuxpConfigsDir() string {
 	return c.tmuxpCfgsDir
+}
+
+// Save saves the tmuxp config as file
+func (c *Config) Save(file string) error {
+	writer, err := c.filesystem.Create(file)
+	if err != nil {
+		return err
+	}
+
+	data, err := yaml.Marshal(c)
+	if err != nil {
+		return err
+	}
+	if _, err := writer.Write(data); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // NewConfig returns a new tmuxp config

@@ -7,6 +7,7 @@ import (
 
 	"github.com/arunvelsriram/kube-tmuxp/pkg/filesystem"
 	"github.com/arunvelsriram/kube-tmuxp/pkg/kubeconfig"
+	"github.com/arunvelsriram/kube-tmuxp/pkg/tmuxp"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -112,6 +113,23 @@ func (c *Config) Process() error {
 				return err
 			}
 			c.kubeCfg.RenameContext(defaultCtxName, cluster.Context, kubeCfgFile)
+
+			fmt.Println("Creating tmuxp config...")
+			windows := tmuxp.Windows{{Name: "default"}}
+			env := tmuxp.Environment{"KUBECONFIG": kubeCfgFile}
+			for k, v := range cluster.Envs {
+				env[k] = v
+			}
+
+			tmuxpCfg, err := tmuxp.NewConfig(cluster.Context, windows, env, c.filesystem)
+			if err != nil {
+				return err
+			}
+
+			tmuxpCfgFile := path.Join(tmuxpCfg.TmuxpConfigsDir(), fmt.Sprintf("%s.yaml", cluster.Context))
+			if err := tmuxpCfg.Save(tmuxpCfgFile); err != nil {
+				return err
+			}
 
 			fmt.Println("")
 		}

@@ -85,6 +85,25 @@ func (c *Config) load(cfgFile string) error {
 	return nil
 }
 
+func (c *Config) saveTmuxpConfig(kubeCfgFile string, cluster Cluster) error {
+	windows := tmuxp.Windows{{Name: "default"}}
+	env := tmuxp.Environment{"KUBECONFIG": kubeCfgFile}
+	for k, v := range cluster.Envs {
+		env[k] = v
+	}
+
+	tmuxpCfg, err := tmuxp.NewConfig(cluster.Context, windows, env, c.filesystem)
+	if err != nil {
+		return err
+	}
+
+	tmuxpCfgFile := path.Join(tmuxpCfg.TmuxpConfigsDir(), fmt.Sprintf("%s.yaml", cluster.Context))
+	if err := tmuxpCfg.Save(tmuxpCfgFile); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Process processes kube-tmuxp configs
 func (c *Config) Process() error {
 	kubeCfgsDir := c.kubeCfg.KubeCfgsDir()
@@ -115,21 +134,7 @@ func (c *Config) Process() error {
 			c.kubeCfg.RenameContext(defaultCtxName, cluster.Context, kubeCfgFile)
 
 			fmt.Println("Creating tmuxp config...")
-			windows := tmuxp.Windows{{Name: "default"}}
-			env := tmuxp.Environment{"KUBECONFIG": kubeCfgFile}
-			for k, v := range cluster.Envs {
-				env[k] = v
-			}
-
-			tmuxpCfg, err := tmuxp.NewConfig(cluster.Context, windows, env, c.filesystem)
-			if err != nil {
-				return err
-			}
-
-			tmuxpCfgFile := path.Join(tmuxpCfg.TmuxpConfigsDir(), fmt.Sprintf("%s.yaml", cluster.Context))
-			if err := tmuxpCfg.Save(tmuxpCfgFile); err != nil {
-				return err
-			}
+			c.saveTmuxpConfig(kubeCfgFile, cluster)
 
 			fmt.Println("")
 		}

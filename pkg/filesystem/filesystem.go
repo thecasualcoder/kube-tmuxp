@@ -1,7 +1,6 @@
 package filesystem
 
 import (
-	"bufio"
 	"io"
 	"os"
 
@@ -44,7 +43,7 @@ func (d *Default) Open(file string) (io.Reader, error) {
 	if err != nil {
 		return reader, err
 	}
-	return bufio.NewReader(reader), err
+	return reader, err
 }
 
 // Create creates a new file or truncates it if it already exists
@@ -54,5 +53,5 @@ func (d *Default) Create(file string) (io.Writer, error) {
 		return writer, err
 	}
 
-	return bufio.NewWriter(writer), nil
+	return writer, nil
 }

@@ -1,6 +1,8 @@
 package tmuxp
 
-import "io"
+import (
+	"github.com/arunvelsriram/kube-tmuxp/pkg/filesystem"
+)
 
 // Window represents a window in a tmux session
 type Window struct {
@@ -19,12 +21,15 @@ type Config struct {
 	SessionName string
 	Windows
 	Environment
-	writer io.Writer
+	filesystem filesystem.FileSystem
 }
 
 // New returns a new tmuxp config
-func New(writer io.Writer) Config {
+func New(sessionName string, windows Windows, environment Environment, fs filesystem.FileSystem) Config {
 	return Config{
-		writer: writer,
+		SessionName: sessionName,
+		Windows:     windows,
+		Environment: environment,
+		filesystem:  fs,
 	}
 }

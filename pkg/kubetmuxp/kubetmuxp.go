@@ -2,10 +2,10 @@ package kubetmuxp
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"path"
 
+	"github.com/arunvelsriram/kube-tmuxp/pkg/filesystem"
 	"github.com/arunvelsriram/kube-tmuxp/pkg/kubeconfig"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -60,11 +60,17 @@ type Projects []Project
 
 // Config represents kube-tmuxp config
 type Config struct {
-	Projects `yaml:"projects"`
-	kubeCfg  kubeconfig.KubeConfig
+	Projects   `yaml:"projects"`
+	filesystem filesystem.FileSystem
+	kubeCfg    kubeconfig.KubeConfig
 }
 
-func (c *Config) read(reader io.Reader) error {
+func (c *Config) load(cfgFile string) error {
+	reader, err := c.filesystem.Open(cfgFile)
+	if err != nil {
+		return err
+	}
+
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return err
@@ -115,10 +121,13 @@ func (c *Config) Process() error {
 }
 
 // NewConfig creates a new kube-tmuxp Config
-func NewConfig(reader io.Reader, kubeCfg kubeconfig.KubeConfig) (Config, error) {
-	cfg := Config{kubeCfg: kubeCfg}
+func NewConfig(cfgFile string, fs filesystem.FileSystem, kubeCfg kubeconfig.KubeConfig) (Config, error) {
+	cfg := Config{
+		filesystem: fs,
+		kubeCfg:    kubeCfg,
+	}
 
-	if err := cfg.read(reader); err != nil {
+	if err := cfg.load(cfgFile); err != nil {
 		return cfg, err
 	}
 

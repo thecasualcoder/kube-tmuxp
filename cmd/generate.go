@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 
@@ -17,20 +16,15 @@ var generateCmd = &cobra.Command{
 	Aliases: []string{"gen"},
 	Short:   "Generates tmuxp configs for various Kubernetes contexts",
 	Run: func(cmd *cobra.Command, args []string) {
-		reader, err := os.Open(cfgFile)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		bufioReader := bufio.NewReader(reader)
-
-		kubeCfg, err := kubeconfig.New(&filesystem.Default{}, &commander.Default{})
+		fs := &filesystem.Default{}
+		cmdr := &commander.Default{}
+		kubeCfg, err := kubeconfig.New(fs, cmdr)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		kubetmuxpCfg, err := kubetmuxp.NewConfig(bufioReader, kubeCfg)
+		kubetmuxpCfg, err := kubetmuxp.NewConfig(cfgFile, fs, kubeCfg)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

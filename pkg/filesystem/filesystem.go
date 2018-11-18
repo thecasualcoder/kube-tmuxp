@@ -1,6 +1,8 @@
 package filesystem
 
 import (
+	"bufio"
+	"io"
 	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -10,6 +12,7 @@ import (
 type FileSystem interface {
 	Remove(file string) error
 	HomeDir() (string, error)
+	Open(file string) (io.Reader, error)
 }
 
 // Default represents the Operating System's filesystem
@@ -32,4 +35,13 @@ func (d *Default) HomeDir() (string, error) {
 	}
 
 	return home, nil
+}
+
+// Open opens a file for reading
+func (d *Default) Open(file string) (io.Reader, error) {
+	reader, err := os.Open(file)
+	if err != nil {
+		return reader, err
+	}
+	return bufio.NewReader(reader), err
 }

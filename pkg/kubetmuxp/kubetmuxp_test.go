@@ -1,6 +1,7 @@
 package kubetmuxp_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -20,22 +21,37 @@ func getKubeCfg(ctrl *gomock.Controller) kubeconfig.KubeConfig {
 }
 
 func TestNewConfig(t *testing.T) {
-	t.Run("should create a new kube-tmuxp config", func(t *testing.T) {
+	t.Run("should create a new kube-tmuxp config from file", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockFS := mock.NewFileSystem(ctrl)
 		reader := strings.NewReader("")
-		kubeCfg := getKubeCfg(ctrl)
-		kubetmuxpCfg, err := kubetmuxp.NewConfig(reader, kubeCfg)
+		mockFS.EXPECT().Open("kube-tmuxp-config.yaml").Return(reader, nil)
+
+		kubetmuxpCfg, err := kubetmuxp.NewConfig("kube-tmuxp-config.yaml", mockFS, kubeconfig.KubeConfig{})
 
 		assert.Nil(t, err)
 		assert.NotNil(t, kubetmuxpCfg)
+	})
+
+	t.Run("should return error if file cannot be opened", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockFS := mock.NewFileSystem(ctrl)
+		mockFS.EXPECT().Open("kube-tmuxp-config.yaml").Return(nil, fmt.Errorf("some error"))
+
+		_, err := kubetmuxp.NewConfig("kube-tmuxp-config.yaml", mockFS, kubeconfig.KubeConfig{})
+
+		assert.EqualError(t, err, "some error")
 	})
 
 	t.Run("should read the kube-tmuxp configs", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockFS := mock.NewFileSystem(ctrl)
 		content := `
 projects:
 - name: test-project
@@ -47,10 +63,8 @@ projects:
     envs:
       TEST_ENV: test-value`
 		reader := strings.NewReader(content)
-		kubeCfg := getKubeCfg(ctrl)
-		kubetmuxpCfg, _ := kubetmuxp.NewConfig(reader, kubeCfg)
-
-		assert.NotNil(t, kubetmuxpCfg)
+		mockFS.EXPECT().Open("kube-tmuxp-config.yaml").Return(reader, nil)
+		kubetmuxpCfg, _ := kubetmuxp.NewConfig("kube-tmuxp-config.yaml", mockFS, kubeconfig.KubeConfig{})
 
 		expectedProjects := kubetmuxp.Projects{
 			{
@@ -68,6 +82,7 @@ projects:
 				},
 			},
 		}
+		assert.NotNil(t, kubetmuxpCfg)
 		assert.Equal(t, expectedProjects, kubetmuxpCfg.Projects)
 	})
 
@@ -75,9 +90,10 @@ projects:
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
+		mockFS := mock.NewFileSystem(ctrl)
 		reader := strings.NewReader("invalid yaml")
-		kubeCfg := getKubeCfg(ctrl)
-		_, err := kubetmuxp.NewConfig(reader, kubeCfg)
+		mockFS.EXPECT().Open("kube-tmuxp-config.yaml").Return(reader, nil)
+		_, err := kubetmuxp.NewConfig("kube-tmuxp-config.yaml", mockFS, kubeconfig.KubeConfig{})
 
 		assert.NotNil(t, err)
 	})

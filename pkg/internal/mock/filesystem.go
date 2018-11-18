@@ -6,6 +6,7 @@ package mock
 
 import (
 	gomock "github.com/golang/mock/gomock"
+	io "io"
 	reflect "reflect"
 )
 
@@ -55,4 +56,17 @@ func (m *FileSystem) HomeDir() (string, error) {
 // HomeDir indicates an expected call of HomeDir
 func (mr *FileSystemMockRecorder) HomeDir() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HomeDir", reflect.TypeOf((*FileSystem)(nil).HomeDir))
+}
+
+// Open mocks base method
+func (m *FileSystem) Open(file string) (io.Reader, error) {
+	ret := m.ctrl.Call(m, "Open", file)
+	ret0, _ := ret[0].(io.Reader)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Open indicates an expected call of Open
+func (mr *FileSystemMockRecorder) Open(file interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Open", reflect.TypeOf((*FileSystem)(nil).Open), file)
 }

@@ -30,8 +30,7 @@ var generateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		kubetmuxpCfg := kubetmuxp.New(bufioReader, kubeCfg)
-		err = kubetmuxpCfg.Load()
+		kubetmuxpCfg, err := kubetmuxp.NewConfig(bufioReader, kubeCfg)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

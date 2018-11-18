@@ -1,7 +1,6 @@
 package kubetmuxp_test
 
 import (
-	"io"
 	"strings"
 	"testing"
 
@@ -20,37 +19,38 @@ func getKubeCfg(ctrl *gomock.Controller) kubeconfig.KubeConfig {
 	return kubeCfg
 }
 
-func TestNew(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+func TestNewConfig(t *testing.T) {
+	t.Run("should create a new kube-tmuxp config", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 
-	var reader io.Reader
-	kubeCfg := getKubeCfg(ctrl)
-	kubetmuxpCfg := kubetmuxp.New(reader, kubeCfg)
+		reader := strings.NewReader("")
+		kubeCfg := getKubeCfg(ctrl)
+		kubetmuxpCfg, err := kubetmuxp.NewConfig(reader, kubeCfg)
 
-	assert.NotNil(t, kubetmuxpCfg)
-}
+		assert.Nil(t, err)
+		assert.NotNil(t, kubetmuxpCfg)
+	})
 
-func TestLoadConfig(t *testing.T) {
-	t.Run("should load the config", func(t *testing.T) {
+	t.Run("should read the kube-tmuxp configs", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
 		content := `
 projects:
-  - name: test-project
-    clusters:
-      - name: test-cluster
-        zone: test-zone
-        region: test-region
-        context: test-ctx
-        envs:
-          TEST_ENV: test-value`
+- name: test-project
+  clusters:
+  - name: test-cluster
+    zone: test-zone
+    region: test-region
+    context: test-ctx
+    envs:
+      TEST_ENV: test-value`
 		reader := strings.NewReader(content)
 		kubeCfg := getKubeCfg(ctrl)
-		kubetmuxpCfg := kubetmuxp.New(reader, kubeCfg)
+		kubetmuxpCfg, _ := kubetmuxp.NewConfig(reader, kubeCfg)
 
-		err := kubetmuxpCfg.Load()
+		assert.NotNil(t, kubetmuxpCfg)
 
 		expectedProjects := kubetmuxp.Projects{
 			{
@@ -68,23 +68,18 @@ projects:
 				},
 			},
 		}
-
-		assert.Nil(t, err)
 		assert.Equal(t, expectedProjects, kubetmuxpCfg.Projects)
 	})
 
-	t.Run("should return error if loading fails", func(t *testing.T) {
+	t.Run("should return error if config cannot be read", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
 		reader := strings.NewReader("invalid yaml")
 		kubeCfg := getKubeCfg(ctrl)
-		kubetmuxpCfg := kubetmuxp.New(reader, kubeCfg)
-
-		err := kubetmuxpCfg.Load()
+		_, err := kubetmuxp.NewConfig(reader, kubeCfg)
 
 		assert.NotNil(t, err)
-		assert.Equal(t, kubetmuxp.Projects(nil), kubetmuxpCfg.Projects)
 	})
 }
 

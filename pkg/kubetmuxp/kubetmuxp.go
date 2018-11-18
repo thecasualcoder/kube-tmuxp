@@ -61,13 +61,11 @@ type Projects []Project
 // Config represents kube-tmuxp config
 type Config struct {
 	Projects `yaml:"projects"`
-	reader   io.Reader
 	kubeCfg  kubeconfig.KubeConfig
 }
 
-// Load constructs kube-tmuxp config from given file
-func (c *Config) Load() error {
-	data, err := ioutil.ReadAll(c.reader)
+func (c *Config) read(reader io.Reader) error {
+	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return err
 	}
@@ -116,10 +114,13 @@ func (c *Config) Process() error {
 	return nil
 }
 
-// New creates a new kube-tmuxp Config
-func New(reader io.Reader, kubeCfg kubeconfig.KubeConfig) Config {
-	return Config{
-		reader:  reader,
-		kubeCfg: kubeCfg,
+// NewConfig creates a new kube-tmuxp Config
+func NewConfig(reader io.Reader, kubeCfg kubeconfig.KubeConfig) (Config, error) {
+	cfg := Config{kubeCfg: kubeCfg}
+
+	if err := cfg.read(reader); err != nil {
+		return cfg, err
 	}
+
+	return cfg, nil
 }

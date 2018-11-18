@@ -36,7 +36,7 @@ var generateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		if err = kubetmuxpCfg.ImportContexts(); err != nil {
+		if err = kubetmuxpCfg.Process(); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}

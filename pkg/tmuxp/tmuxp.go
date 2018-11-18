@@ -33,8 +33,8 @@ func (c *Config) TmuxpConfigsDir() string {
 	return c.tmuxpCfgsDir
 }
 
-// New returns a new tmuxp config
-func New(sessionName string, windows Windows, environment Environment, fs filesystem.FileSystem) (*Config, error) {
+// NewConfig returns a new tmuxp config
+func NewConfig(sessionName string, windows Windows, environment Environment, fs filesystem.FileSystem) (*Config, error) {
 	home, err := fs.HomeDir()
 	if err != nil {
 		return nil, err

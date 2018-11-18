@@ -10,14 +10,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNew(t *testing.T) {
+func TestNewConfig(t *testing.T) {
 	t.Run("should create a tmuxp config", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
 		mockFS := mock.NewFileSystem(ctrl)
 		mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
-		tmuxpCfg, err := tmuxp.New("session", tmuxp.Windows{}, tmuxp.Environment{}, mockFS)
+		tmuxpCfg, err := tmuxp.NewConfig("session", tmuxp.Windows{}, tmuxp.Environment{}, mockFS)
 
 		assert.Nil(t, err)
 		assert.NotNil(t, tmuxpCfg)
@@ -29,7 +29,7 @@ func TestNew(t *testing.T) {
 
 		mockFS := mock.NewFileSystem(ctrl)
 		mockFS.EXPECT().HomeDir().Return("", fmt.Errorf("some error"))
-		_, err := tmuxp.New("session", tmuxp.Windows{}, tmuxp.Environment{}, mockFS)
+		_, err := tmuxp.NewConfig("session", tmuxp.Windows{}, tmuxp.Environment{}, mockFS)
 
 		assert.EqualError(t, err, "some error")
 	})
@@ -41,7 +41,7 @@ func TestTmuxpConfigsDir(t *testing.T) {
 
 	mockFS := mock.NewFileSystem(ctrl)
 	mockFS.EXPECT().HomeDir().Return("/Users/test", nil)
-	tmuxpCfg, _ := tmuxp.New("session", tmuxp.Windows{}, tmuxp.Environment{}, mockFS)
+	tmuxpCfg, _ := tmuxp.NewConfig("session", tmuxp.Windows{}, tmuxp.Environment{}, mockFS)
 
 	assert.Equal(t, "/Users/test/.tmuxp", tmuxpCfg.TmuxpConfigsDir())
 }

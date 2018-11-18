@@ -13,47 +13,48 @@ Given a config similar to [config.sample.yaml](./config.sample.yaml), `kube-tmux
 * kube config (Kubernetes context) for each Kubernetes cluster under `~/.kube/configs`
 * `tmuxp` config for each Kubernetes cluster under `~/.tmuxp`
 
-The generated `tmuxp` configs are used to start preconfigured `tmux` sessions.
+The generated `tmuxp` configs can be used to start preconfigured `tmux` sessions.
 
-## How to use?
-
-### Prerequisites
+## Prerequisites
 
 * [gcloud](https://cloud.google.com/sdk/)
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * [tmux](https://github.com/tmux/tmux)
 * [tmuxp](https://github.com/tmux-python/tmuxp)
 
-### Generate kube configs and `tmuxp` configs
+## Install
 
-* Clone the repo
+### Homebrew
 
-  ```
-  git clone https://github.com/arunvelsriram/kube-tmuxp.git
-  ```
+To be updated
 
-* Setup `virtualenv`
+### Manual
 
-  ```
-  virtualenv --python=python3.6 venv
-  source venv/bin/activate
-  pip install -r requirements.txt
-  ```
+```
+git clone https://github.com/arunvelsriram/kube-tmuxp.git
+cd kube-tmuxp
+make build
+cp ./out/kube-tmuxp /usr/local/bin/kube-tmuxp
+```
+
+## Generate kubeconfigs and `tmuxp` configs
 
 * Copy the sample config ([config.sample.yaml](./config.sample.yaml))
 
   ```
-  cp config.sample.yaml config.yaml
+  cp config.sample.yaml ~/.kube-tmuxp.yaml
   ```
 
-* Add your clusters to the copied config
-* Generate kube configs and tmuxp configs
+* Add your projects and clusters to the copied config
+* Generate kubeconfigs and tmuxp configs
 
 ```
-python kube_tmuxp.py config.yaml
+kube-tmuxp gen
 ```
 
-### Start a session
+Default config path is `$HOME/.kube-tmuxp.yaml`. If you are using a different path, then use the `--config` flag to specify that path. Refer `kube-tmuxp --help` for more details.
+
+## Start a session
 
 ```
 tmuxp load my-context-name
@@ -63,4 +64,4 @@ Now you will be inside a `tmux` session preconfigured with Kubernetes context `m
 
 ## Limitations
 
-* Generates kube configs for Kubernetes clusters (GKE) on Google Cloud Platform (GCP) only
+* Currently works for Google Kubernetes Engine (GKE) only. However, it can be extended to work with any Kubernetes clusters. Feel free to submit a PR for this.

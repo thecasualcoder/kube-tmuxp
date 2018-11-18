@@ -78,8 +78,9 @@ func (c *Config) read(reader io.Reader) error {
 	return nil
 }
 
-// Process processes kube-tmuxp configs
-func (c *Config) Process() error {
+// ImportContexts clean up old contexts and import them
+// freshly for all the clusters in the kube-tmuxp config
+func (c *Config) ImportContexts() error {
 	kubeCfgsDir := c.kubeCfg.KubeCfgsDir()
 	for _, project := range c.Projects {
 		for _, cluster := range project.Clusters {

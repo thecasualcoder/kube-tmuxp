@@ -1,6 +1,8 @@
 package tmuxp
 
 import (
+	"path"
+
 	"github.com/arunvelsriram/kube-tmuxp/pkg/filesystem"
 )
 
@@ -21,15 +23,29 @@ type Config struct {
 	SessionName string
 	Windows
 	Environment
-	filesystem filesystem.FileSystem
+	filesystem   filesystem.FileSystem
+	tmuxpCfgsDir string
+}
+
+// TmuxpConfigsDir returns the directory in which tmuxp
+// configs are stored
+func (c *Config) TmuxpConfigsDir() string {
+	return c.tmuxpCfgsDir
 }
 
 // New returns a new tmuxp config
-func New(sessionName string, windows Windows, environment Environment, fs filesystem.FileSystem) Config {
-	return Config{
-		SessionName: sessionName,
-		Windows:     windows,
-		Environment: environment,
-		filesystem:  fs,
+func New(sessionName string, windows Windows, environment Environment, fs filesystem.FileSystem) (*Config, error) {
+	home, err := fs.HomeDir()
+	if err != nil {
+		return nil, err
 	}
+	tmuxpCfgsDir := path.Join(home, ".tmuxp")
+
+	return &Config{
+		SessionName:  sessionName,
+		Windows:      windows,
+		Environment:  environment,
+		filesystem:   fs,
+		tmuxpCfgsDir: tmuxpCfgsDir,
+	}, nil
 }

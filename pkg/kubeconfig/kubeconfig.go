@@ -16,7 +16,7 @@ type KubeConfig struct {
 	kubeCfgsDir string
 }
 
-// Delete deletes the kubeconfig file for the given context
+// Delete deletes the given kubeconfig file
 func (k *KubeConfig) Delete(kubeCfgFile string) error {
 	if err := k.filesystem.Remove(kubeCfgFile); err != nil && !os.IsNotExist(err) {
 		return err
@@ -26,7 +26,7 @@ func (k *KubeConfig) Delete(kubeCfgFile string) error {
 }
 
 // AddRegionalCluster imports Kubernetes context for
-// regional Kubernetes cluster
+// a regional Kubernetes cluster
 func (k *KubeConfig) AddRegionalCluster(project string, cluster string, region string, kubeCfgFile string) error {
 	args := []string{
 		"beta",
@@ -50,7 +50,7 @@ func (k *KubeConfig) AddRegionalCluster(project string, cluster string, region s
 }
 
 // AddZonalCluster imports Kubernetes context for
-// zonal Kubernetes cluster
+// a zonal Kubernetes cluster
 func (k *KubeConfig) AddZonalCluster(project string, cluster string, zone string, kubeCfgFile string) error {
 	args := []string{
 		"container",

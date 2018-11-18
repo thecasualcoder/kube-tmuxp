@@ -70,3 +70,16 @@ func (m *FileSystem) Open(file string) (io.Reader, error) {
 func (mr *FileSystemMockRecorder) Open(file interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Open", reflect.TypeOf((*FileSystem)(nil).Open), file)
 }
+
+// Create mocks base method
+func (m *FileSystem) Create(file string) (io.Writer, error) {
+	ret := m.ctrl.Call(m, "Create", file)
+	ret0, _ := ret[0].(io.Writer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create
+func (mr *FileSystemMockRecorder) Create(file interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*FileSystem)(nil).Create), file)
+}

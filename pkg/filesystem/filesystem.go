@@ -13,6 +13,7 @@ type FileSystem interface {
 	Remove(file string) error
 	HomeDir() (string, error)
 	Open(file string) (io.Reader, error)
+	Create(file string) (io.Writer, error)
 }
 
 // Default represents the Operating System's filesystem
@@ -44,4 +45,14 @@ func (d *Default) Open(file string) (io.Reader, error) {
 		return reader, err
 	}
 	return bufio.NewReader(reader), err
+}
+
+// Create creates a new file or truncates it if it already exists
+func (d *Default) Create(file string) (io.Writer, error) {
+	writer, err := os.Create(file)
+	if err != nil {
+		return writer, err
+	}
+
+	return bufio.NewWriter(writer), nil
 }

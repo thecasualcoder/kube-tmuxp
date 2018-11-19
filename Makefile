@@ -43,7 +43,7 @@ build: fmt vet compile ## build the application
 mocks: ## generate mocks for testing
 	./scripts/mocks
 
-tests: ## run all tests
+tests: ensure-out-dir # run all tests
 	$(GOBIN) test $(SRC_PACKAGES) -p=1 -coverprofile ./out/coverage -v
 
 tests-cover-html: ensure-out-dir ## run all tests and generates coverage report in html

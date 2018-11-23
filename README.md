@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/arunvelsriram/kube-tmuxp.svg?branch=master)](https://travis-ci.org/arunvelsriram/kube-tmuxp)
 
-Easier way to work with multiple [Kubernetes](https://kubernetes.io/) clusters.
+Tool to generate tmuxp configs that help to switch between multiple [Kubernetes](https://kubernetes.io/) contexts safely.
 
 ## Introduction
 

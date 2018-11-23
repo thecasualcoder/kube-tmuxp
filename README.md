@@ -67,6 +67,10 @@ tmuxp load my-context-name
 
 Now you will be inside a `tmux` session preconfigured with Kubernetes context `my-context-name`.
 
+## Handy bash functions
+
+Use the `bash` functions available [here](https://github.com/arunvelsriram/dotfiles/blob/master/bash_it_custom/plugins/kube-tmuxp.plugin.bash) to switch, kill sessions easily. Special thanks to [@jskswamy](https://github.com/jskswamy) for writing these awesome functions.
+
 ## Limitations
 
 * Currently works for Google Kubernetes Engine (GKE) only. However, it can be extended to work with any Kubernetes clusters. Feel free to submit a PR for this.

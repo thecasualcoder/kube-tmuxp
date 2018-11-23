@@ -3,6 +3,7 @@
 
 #Output
 out/
+dist/
 
 # user configs
 config.yaml

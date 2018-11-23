@@ -1,6 +1,6 @@
 language: go
 go:
-  -  "1.11.x"
+  - "1.11.x"
   - master
 
 env:
@@ -9,3 +9,11 @@ env:
 install: make setup modules
 
 script: make tests tests-cover-html build
+
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: curl -sL https://git.io/goreleaser | bash
+    on:
+      tags: true
+      condition: $TRAVIS_OS_NAME = linux

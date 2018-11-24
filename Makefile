@@ -5,6 +5,7 @@ help: ## prints help (only for tasks with comment)
 APP=kube-tmuxp
 SRC_PACKAGES=$(shell go list ./...)
 APP_EXECUTABLE="./out/$(APP)"
+BUILD?=$(shell git describe --tags --always --dirty)
 RICHGO=$(shell command -v richgo 2> /dev/null)
 
 ifeq ($(RICHGO),)
@@ -22,10 +23,10 @@ modules: ## add missing and remove unused modules
 	go mod tidy
 
 compile: ensure-out-dir ## compiles kube-tmuxp for this platform
-	$(GOBIN) build -o $(APP_EXECUTABLE) ./main.go
+	$(GOBIN) build -ldflags "-X main.version=${BUILD}" -o $(APP_EXECUTABLE) ./main.go
 
 compile-linux: ensure-out-dir ## compiles kube-tmuxp for linux
-	GOOS=linux GOARCH=amd64 $(GOBIN) build -o $(APP_EXECUTABLE) ./main.go
+	GOOS=linux GOARCH=amd64 $(GOBIN) build -ldflags "-X main.version=${BUILD}" -o $(APP_EXECUTABLE) ./main.go
 
 fmt: ## format go code
 	$(GOBIN) fmt $(SRC_PACKAGES)

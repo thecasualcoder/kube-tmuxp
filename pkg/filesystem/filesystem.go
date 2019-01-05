@@ -13,6 +13,7 @@ type FileSystem interface {
 	HomeDir() (string, error)
 	Open(file string) (io.Reader, error)
 	Create(file string) (io.Writer, error)
+	CreateDirIfNotExist(dir string) error
 }
 
 // Default represents the Operating System's filesystem
@@ -54,4 +55,12 @@ func (d *Default) Create(file string) (io.Writer, error) {
 	}
 
 	return writer, nil
+}
+
+// CreateDirIfNotExist creates a new directory if it already exists
+func (d *Default) CreateDirIfNotExist(dir string) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return os.Mkdir(dir, 0755)
+	}
+	return nil
 }

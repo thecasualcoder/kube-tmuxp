@@ -60,6 +60,10 @@ func NewConfig(sessionName string, windows Windows, environment Environment, fs 
 	}
 	tmuxpCfgsDir := path.Join(home, ".tmuxp")
 
+	err = fs.CreateDirIfNotExist(tmuxpCfgsDir)
+	if err != nil {
+		return nil, err
+	}
 	return &Config{
 		SessionName:  sessionName,
 		Windows:      windows,

@@ -83,3 +83,15 @@ func (m *FileSystem) Create(file string) (io.Writer, error) {
 func (mr *FileSystemMockRecorder) Create(file interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*FileSystem)(nil).Create), file)
 }
+
+// CreateDirIfNotExist mocks base method
+func (m *FileSystem) CreateDirIfNotExist(dir string) error {
+	ret := m.ctrl.Call(m, "CreateDirIfNotExist", dir)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateDirIfNotExist indicates an expected call of CreateDirIfNotExist
+func (mr *FileSystemMockRecorder) CreateDirIfNotExist(dir interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDirIfNotExist", reflect.TypeOf((*FileSystem)(nil).CreateDirIfNotExist), dir)
+}

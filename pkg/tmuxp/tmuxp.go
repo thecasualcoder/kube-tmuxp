@@ -3,7 +3,7 @@ package tmuxp
 import (
 	"path"
 
-	"github.com/arunvelsriram/kube-tmuxp/pkg/filesystem"
+	"github.com/thecasualcoder/kube-tmuxp/pkg/filesystem"
 	yaml "gopkg.in/yaml.v2"
 )
 

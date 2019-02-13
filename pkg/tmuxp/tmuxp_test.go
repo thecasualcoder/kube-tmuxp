@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/arunvelsriram/kube-tmuxp/pkg/internal/mock"
-	"github.com/arunvelsriram/kube-tmuxp/pkg/tmuxp"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecasualcoder/kube-tmuxp/pkg/internal/mock"
+	"github.com/thecasualcoder/kube-tmuxp/pkg/tmuxp"
 )
 
 func TestNewConfig(t *testing.T) {

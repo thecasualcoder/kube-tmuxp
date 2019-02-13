@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 	"path"
 
-	"github.com/arunvelsriram/kube-tmuxp/pkg/filesystem"
-	"github.com/arunvelsriram/kube-tmuxp/pkg/kubeconfig"
-	"github.com/arunvelsriram/kube-tmuxp/pkg/tmuxp"
+	"github.com/thecasualcoder/kube-tmuxp/pkg/filesystem"
+	"github.com/thecasualcoder/kube-tmuxp/pkg/kubeconfig"
+	"github.com/thecasualcoder/kube-tmuxp/pkg/tmuxp"
 	yaml "gopkg.in/yaml.v2"
 )
 

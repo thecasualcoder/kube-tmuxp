@@ -5,8 +5,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/arunvelsriram/kube-tmuxp/pkg/commander"
-	"github.com/arunvelsriram/kube-tmuxp/pkg/filesystem"
+	"github.com/thecasualcoder/kube-tmuxp/pkg/commander"
+	"github.com/thecasualcoder/kube-tmuxp/pkg/filesystem"
 )
 
 // KubeConfig exposes methods to perform actions on kubeconfig

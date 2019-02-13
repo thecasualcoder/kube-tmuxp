@@ -3,8 +3,8 @@ package commander_test
 import (
 	"testing"
 
-	"github.com/arunvelsriram/kube-tmuxp/pkg/commander"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecasualcoder/kube-tmuxp/pkg/commander"
 )
 
 func TestExecute(t *testing.T) {

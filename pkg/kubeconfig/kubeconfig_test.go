@@ -5,10 +5,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/arunvelsriram/kube-tmuxp/pkg/internal/mock"
-	"github.com/arunvelsriram/kube-tmuxp/pkg/kubeconfig"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecasualcoder/kube-tmuxp/pkg/internal/mock"
+	"github.com/thecasualcoder/kube-tmuxp/pkg/kubeconfig"
 )
 
 func TestNew(t *testing.T) {

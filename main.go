@@ -1,6 +1,6 @@
 package main
 
-import "github.com/arunvelsriram/kube-tmuxp/cmd"
+import "github.com/thecasualcoder/kube-tmuxp/cmd"
 
 var version string
 

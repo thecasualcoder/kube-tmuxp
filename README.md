@@ -36,7 +36,7 @@ brew install kube-tmuxp
 ### Manual
 
 ```
-git clone https://github.com/arunvelsriram/kube-tmuxp.git
+git clone https://github.com/thecasualcoder/kube-tmuxp.git
 cd kube-tmuxp
 make build
 cp ./out/kube-tmuxp /usr/local/bin/kube-tmuxp

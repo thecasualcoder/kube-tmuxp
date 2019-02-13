@@ -1,4 +1,4 @@
-module github.com/arunvelsriram/kube-tmuxp
+module github.com/thecasualcoder/kube-tmuxp
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect

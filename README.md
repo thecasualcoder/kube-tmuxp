@@ -29,7 +29,7 @@ The generated `tmuxp` configs can be used to start preconfigured `tmux` sessions
 ### Homebrew
 
 ```
-brew tap arunvelsriram/stable
+brew tap thecasualcoder/stable
 brew install kube-tmuxp
 ```
 

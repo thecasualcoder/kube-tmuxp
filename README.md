@@ -1,6 +1,6 @@
 # kube-tmuxp
 
-[![Build Status](https://travis-ci.org/arunvelsriram/kube-tmuxp.svg?branch=master)](https://travis-ci.org/arunvelsriram/kube-tmuxp)
+[![Build Status](https://travis-ci.org/thecasualcoder/kube-tmuxp.svg?branch=master)](https://travis-ci.org/thecasualcoder/kube-tmuxp)
 
 Tool to generate tmuxp configs that help to switch between multiple [Kubernetes](https://kubernetes.io/) contexts safely.
 

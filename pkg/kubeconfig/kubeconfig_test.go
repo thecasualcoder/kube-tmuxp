@@ -105,8 +105,6 @@ func TestAddRegionalCluster(t *testing.T) {
 			"--project=test-project",
 		}
 		envs := []string{
-			"CLOUDSDK_CONTAINER_USE_V1_API_CLIENT=false",
-			"CLOUDSDK_CONTAINER_USE_V1_API=false",
 			"KUBECONFIG=/Users/test/.kube/configs/test-context",
 		}
 		mockCmdr.EXPECT().Execute("gcloud", args, envs).Return("Context added successfully", nil)
@@ -135,8 +133,6 @@ func TestAddRegionalCluster(t *testing.T) {
 			"--project=test-project",
 		}
 		envs := []string{
-			"CLOUDSDK_CONTAINER_USE_V1_API_CLIENT=false",
-			"CLOUDSDK_CONTAINER_USE_V1_API=false",
 			"KUBECONFIG=/Users/test/.kube/configs/test-context",
 		}
 		mockCmdr.EXPECT().Execute("gcloud", args, envs).Return("", fmt.Errorf("some error"))

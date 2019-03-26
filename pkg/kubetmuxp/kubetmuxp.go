@@ -121,9 +121,13 @@ func (c *Config) Process() error {
 			if regional, err := cluster.IsRegional(); err != nil {
 				return err
 			} else if regional {
-				c.kubeCfg.AddRegionalCluster(project.Name, cluster.Name, cluster.Region, kubeCfgFile)
+				if err := c.kubeCfg.AddRegionalCluster(project.Name, cluster.Name, cluster.Region, kubeCfgFile); err != nil {
+					return err
+				}
 			} else {
-				c.kubeCfg.AddZonalCluster(project.Name, cluster.Name, cluster.Zone, kubeCfgFile)
+				if err := c.kubeCfg.AddZonalCluster(project.Name, cluster.Name, cluster.Zone, kubeCfgFile); err != nil {
+					return err
+				}
 			}
 
 			fmt.Println("Renaming context...")

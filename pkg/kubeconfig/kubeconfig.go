@@ -38,8 +38,6 @@ func (k *KubeConfig) AddRegionalCluster(project string, cluster string, region s
 		fmt.Sprintf("--project=%s", project),
 	}
 	envs := []string{
-		"CLOUDSDK_CONTAINER_USE_V1_API_CLIENT=false",
-		"CLOUDSDK_CONTAINER_USE_V1_API=false",
 		fmt.Sprintf("KUBECONFIG=%s", kubeCfgFile),
 	}
 	if _, err := k.commander.Execute("gcloud", args, envs); err != nil {

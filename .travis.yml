@@ -6,7 +6,7 @@ env:
     - GO111MODULE=on
     - secure: azgsx/4nSKps0b1cPxNt1p5eke8m84U+gpUD0r+bjwj+7anhDkaTMzj4sBwPNf56h1+AGmKVBBflcjuJg34ONLLOZhNQ1QwM8nypuX0pn4Y42JkTnAFVSGA7Scw9F3/gdBU1aqnqj4Hb3q72RzVyY+LI6SZpXebpv5PiTdOv0uffrYmxtmZ/9HRFlBRTGEUws+oOXoNr5fK1bcvpDBHbdUAsEpj/CJocpJ5U85XU51E38InEmx1fiFxcIuddC6IkuWRL9rTLw4xMNVz8QUcEX7yLAkbMi8UMB9BYB91qh8NMcd6sKsrCy4a8ue+H3VWpVc634/fAkfp9N3YFmQBlDUQ0tt41UhXPoTqABrjv+TLt42ydUItqdokSVwvMPc5ucQ3hwpqt2JMKE5/Pj36PwFqUE4mC7woAWqO4YnEf5jC0Rek2JMxqbljVlfANH9RI3ormEWmdtO6/VKjuauCCq3BIUogygCoZ1iJQgKVzhjc8V9o1cSyW/PxfL/uBUQr32toYd4tGGHqiZeHUCwALY1khNPN+8miWlXExdjkjPjWdyoYXDiO3S4JNY0Q7cRQZs9nwI4+FCsNR9/Borq/l1/LlFbD56vyhywLBpRkODAsX/+zRPlgZOOcPtTgzMN+OGeC1WNCrr8A5YJ/w5avM91Z0M00w1a45u/KkX437fbI=
 install: make setup modules
-script: make tests tests-cover-html build && git diff
+script: make tests tests-cover-html build
 deploy:
   - provider: script
     skip_cleanup: true

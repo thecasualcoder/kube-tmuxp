@@ -3,8 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path"
 
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -27,22 +28,18 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kube-tmuxp.yaml)")
+	home, err := homedir.Dir()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	configFileName := ".kube-tmuxp.yaml"
+	cfgFile = path.Join(home, configFileName)
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", cfgFile, "config file")
 }
 
 func initConfig() {
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-	} else {
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".kube-tmuxp")
-	}
+	viper.SetConfigFile(cfgFile)
 
 	viper.AutomaticEnv()
 

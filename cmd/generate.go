@@ -24,6 +24,7 @@ var generateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		fmt.Println("Using config file:", cfgFile)
 		kubetmuxpCfg, err := kubetmuxp.NewConfig(cfgFile, fs, kubeCfg)
 		if err != nil {
 			fmt.Println(err)

@@ -20,6 +20,7 @@ var configGenerateCmd = &cobra.Command{
 			_, _ = fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+		_, _ = fmt.Fprintf(os.Stderr, "Number of gcloud projects: %d\n", len(projectIds))
 		projects := make(kubetmuxp.Projects, 0, len(projectIds))
 		for _, projectId := range projectIds {
 			clusters, err := gcloud.ListClusters(projectId)
@@ -27,6 +28,7 @@ var configGenerateCmd = &cobra.Command{
 				_, _ = fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
 			}
+			_, _ = fmt.Fprintf(os.Stderr, "Number of clusters for %s project: %d\n", projectId, len(clusters))
 			kubetmuxpClusters := make(kubetmuxp.Clusters, 0, len(clusters))
 			for _, cluster := range clusters {
 				zone := ""

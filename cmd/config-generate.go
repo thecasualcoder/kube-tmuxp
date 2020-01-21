@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/gcloud"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/kubetmuxp"
+	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 var configGenerateCmd = &cobra.Command{
@@ -21,8 +22,14 @@ var configGenerateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		_, _ = fmt.Fprintf(os.Stderr, "Number of gcloud projects: %d\n", len(projectIds))
-		projects := make(kubetmuxp.Projects, 0, len(projectIds))
-		for _, projectId := range projectIds {
+		selectedProjectIds, err := getSelectedProjects(projectIds)
+		if err != nil {
+			_, _ = fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		_, _ = fmt.Fprintf(os.Stderr, "Number of selected gcloud projects: %d\n", len(selectedProjectIds))
+		projects := make(kubetmuxp.Projects, 0, len(selectedProjectIds))
+		for _, projectId := range selectedProjectIds {
 			clusters, err := gcloud.ListClusters(projectId)
 			if err != nil {
 				_, _ = fmt.Fprintln(os.Stderr, err)
@@ -58,6 +65,16 @@ var configGenerateCmd = &cobra.Command{
 		}
 		fmt.Println(string(bytes))
 	},
+}
+
+func getSelectedProjects(projects []string) ([]string, error) {
+	var selectedProjects []string
+	prompt := &survey.MultiSelect{
+		Message: "Select gcloud projects that you want to configure:",
+		Options: projects,
+	}
+	err := survey.AskOne(prompt, &selectedProjects, func(ans interface{}) error { return nil })
+	return selectedProjects, err
 }
 
 func init() {

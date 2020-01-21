@@ -16,26 +16,18 @@ var configGenerateCmd = &cobra.Command{
 	Aliases: []string{"cgen"},
 	Short:   "Generates configs for kube-tmuxp based on gcloud account",
 	Run: func(cmd *cobra.Command, args []string) {
-		projectIds, err := gcloud.ListProjects()
-		if err != nil {
-			_, _ = fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
-		_, _ = fmt.Fprintf(os.Stderr, "Number of gcloud projects: %d\n", len(projectIds))
-		selectedProjectIds, err := getSelectedProjects(projectIds)
-		if err != nil {
-			_, _ = fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
-		_, _ = fmt.Fprintf(os.Stderr, "Number of selected gcloud projects: %d\n", len(selectedProjectIds))
-		projects := make(kubetmuxp.Projects, 0, len(selectedProjectIds))
-		for _, projectId := range selectedProjectIds {
+
+		projectIds := getGCloudProjects(allProjects)
+
+		projects := make(kubetmuxp.Projects, 0, len(projectIds))
+		for _, projectId := range projectIds {
 			clusters, err := gcloud.ListClusters(projectId)
 			if err != nil {
 				_, _ = fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
 			}
 			_, _ = fmt.Fprintf(os.Stderr, "Number of clusters for %s project: %d\n", projectId, len(clusters))
+
 			kubetmuxpClusters := make(kubetmuxp.Clusters, 0, len(clusters))
 			for _, cluster := range clusters {
 				zone := ""
@@ -67,6 +59,25 @@ var configGenerateCmd = &cobra.Command{
 	},
 }
 
+func getGCloudProjects(allProjects bool) []string {
+	projectIds, err := gcloud.ListProjects()
+	if err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	_, _ = fmt.Fprintf(os.Stderr, "Number of gcloud projects: %d\n", len(projectIds))
+	if allProjects {
+		return projectIds
+	}
+	selectedProjectIds, err := getSelectedProjects(projectIds)
+	if err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	_, _ = fmt.Fprintf(os.Stderr, "Number of selected gcloud projects: %d\n", len(selectedProjectIds))
+	return selectedProjectIds
+}
+
 func getSelectedProjects(projects []string) ([]string, error) {
 	var selectedProjects []string
 	prompt := &survey.MultiSelect{
@@ -77,6 +88,9 @@ func getSelectedProjects(projects []string) ([]string, error) {
 	return selectedProjects, err
 }
 
+var allProjects bool
+
 func init() {
+	configGenerateCmd.PersistentFlags().BoolVar(&allProjects, "allProjects", false, "Skip confirmation for projects")
 	rootCmd.AddCommand(configGenerateCmd)
 }

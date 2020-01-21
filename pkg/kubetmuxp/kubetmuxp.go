@@ -17,10 +17,10 @@ type Envs map[string]string
 //Cluster represents a Kubernetes cluster
 type Cluster struct {
 	Name    string `yaml:"name"`
-	Zone    string `yaml:"zone"`
-	Region  string `yaml:"region"`
+	Zone    string `yaml:"zone,omitempty"`
+	Region  string `yaml:"region,omitempty"`
 	Context string `yaml:"context"`
-	Envs    `yaml:"envs"`
+	Envs    `yaml:"envs,omitempty"`
 }
 
 // DefaultContextName returns default context name

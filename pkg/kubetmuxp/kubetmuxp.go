@@ -8,7 +8,7 @@ import (
 	"github.com/thecasualcoder/kube-tmuxp/pkg/filesystem"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/kubeconfig"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/tmuxp"
-	yaml "gopkg.in/yaml.v2"
+	yamlV2 "gopkg.in/yaml.v2"
 )
 
 // Envs reprensents environemnt variables
@@ -77,7 +77,7 @@ func (c *Config) load(cfgFile string) error {
 		return err
 	}
 
-	err = yaml.Unmarshal(data, c)
+	err = yamlV2.Unmarshal(data, c)
 	if err != nil {
 		return err
 	}

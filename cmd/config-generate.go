@@ -84,7 +84,11 @@ func getSelectedProjects(projects []string) ([]string, error) {
 		Message: "Select gcloud projects that you want to configure:",
 		Options: projects,
 	}
-	err := survey.AskOne(prompt, &selectedProjects, func(ans interface{}) error { return nil })
+	opt := func(options *survey.AskOptions) error {
+		options.Stdio.Out = os.Stderr
+		return nil
+	}
+	err := survey.AskOne(prompt, &selectedProjects, func(ans interface{}) error { return nil }, opt)
 	return selectedProjects, err
 }
 

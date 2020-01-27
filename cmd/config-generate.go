@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/gcloud"
@@ -18,6 +19,16 @@ var configGenerateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		projectIds := getGCloudProjects(allProjects)
+
+		additionalEnvsMap := map[string]string{}
+		for _, env := range additionalEnvs {
+			envKeyValue := strings.Split(env, "=")
+			if len(envKeyValue) != 2 {
+				_, _ = fmt.Fprintln(os.Stderr, fmt.Sprint("wrong env format: should be key=value"))
+				os.Exit(1)
+			}
+			additionalEnvsMap[envKeyValue[0]] = envKeyValue[1]
+		}
 
 		projects := make(kubetmuxp.Projects, 0, len(projectIds))
 		for _, projectId := range projectIds {
@@ -37,12 +48,16 @@ var configGenerateCmd = &cobra.Command{
 				} else {
 					zone = cluster.Location
 				}
+				baseEnvs := map[string]string{
+					"CLUSTER_NAME":   cluster.Name,
+					"GCP_PROJECT_ID": projectId,
+				}
 				kubetmuxpClusters = append(kubetmuxpClusters, kubetmuxp.Cluster{
 					Name:    cluster.Name,
 					Zone:    zone,
 					Region:  region,
 					Context: cluster.Name,
-					Envs:    nil,
+					Envs:    mergeEnvs(baseEnvs, additionalEnvsMap),
 				})
 			}
 			projects = append(projects, kubetmuxp.Project{
@@ -57,6 +72,23 @@ var configGenerateCmd = &cobra.Command{
 		}
 		fmt.Println(string(bytes))
 	},
+}
+
+func mergeEnvs(base, additionalEnvsMap map[string]string) map[string]string {
+	for k, v := range additionalEnvsMap {
+		if strings.HasPrefix(v, "$") {
+			newKeyFromValue := strings.Replace(v, "$", "", 1)
+			value, ok := base[newKeyFromValue]
+			if ok {
+				base[k] = value
+			} else {
+				base[k] = os.Getenv(newKeyFromValue)
+			}
+			continue
+		}
+		base[k] = v
+	}
+	return base
 }
 
 func getGCloudProjects(allProjects bool) []string {
@@ -93,8 +125,10 @@ func getSelectedProjects(projects []string) ([]string, error) {
 }
 
 var allProjects bool
+var additionalEnvs []string
 
 func init() {
 	configGenerateCmd.PersistentFlags().BoolVar(&allProjects, "allProjects", false, "Skip confirmation for projects")
+	configGenerateCmd.Flags().StringSliceVar(&additionalEnvs, "additionalEnvs", nil, "Additional envs to be populated")
 	rootCmd.AddCommand(configGenerateCmd)
 }

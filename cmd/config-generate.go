@@ -78,17 +78,15 @@ var configGenerateCmd = &cobra.Command{
 
 func mergeEnvs(base, additionalEnvsMap map[string]string) map[string]string {
 	for k, v := range additionalEnvsMap {
-		if strings.HasPrefix(v, "$") {
-			newKeyFromValue := strings.Replace(v, "$", "", 1)
-			value, ok := base[newKeyFromValue]
+		expandedValue := os.Expand(v, func(s string) string {
+			value, ok := base[s]
 			if ok {
-				base[k] = value
+				return value
 			} else {
-				base[k] = os.Getenv(newKeyFromValue)
+				return os.Getenv(s)
 			}
-			continue
-		}
-		base[k] = v
+		})
+		base[k] = expandedValue
 	}
 	return base
 }

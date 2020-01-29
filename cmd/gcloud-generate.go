@@ -16,10 +16,9 @@ import (
 	"gopkg.in/AlecAivazis/survey.v1"
 )
 
-var configGenerateCmd = &cobra.Command{
-	Use:     "config-generate",
-	Aliases: []string{"cgen"},
-	Short:   "Generates configs for kube-tmuxp based on gcloud account",
+var gcloudGenerateCmd = &cobra.Command{
+	Use:   "gcloud-generate",
+	Short: "Generates configs for kube-tmuxp based on gcloud account",
 	Run: func(cmd *cobra.Command, args []string) {
 		projects, err := getProjects()
 		if err != nil {
@@ -161,8 +160,8 @@ var allProjects, apply bool
 var additionalEnvs []string
 
 func init() {
-	configGenerateCmd.Flags().BoolVar(&allProjects, "allProjects", false, "Skip confirmation for projects")
-	configGenerateCmd.Flags().BoolVar(&apply, "apply", false, "Directly create the tmuxp configs for selected projects")
-	configGenerateCmd.Flags().StringSliceVar(&additionalEnvs, "additionalEnvs", nil, "Additional envs to be populated")
-	rootCmd.AddCommand(configGenerateCmd)
+	gcloudGenerateCmd.Flags().BoolVar(&allProjects, "allProjects", false, "Skip confirmation for projects")
+	gcloudGenerateCmd.Flags().BoolVar(&apply, "apply", false, "Directly create the tmuxp configs for selected projects")
+	gcloudGenerateCmd.Flags().StringSliceVar(&additionalEnvs, "additionalEnvs", nil, "Additional envs to be populated")
+	rootCmd.AddCommand(gcloudGenerateCmd)
 }

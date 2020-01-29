@@ -49,8 +49,10 @@ var configGenerateCmd = &cobra.Command{
 					zone = cluster.Location
 				}
 				baseEnvs := map[string]string{
-					"CLUSTER_NAME":   cluster.Name,
-					"GCP_PROJECT_ID": projectId,
+					"KUBETMUXP_CLUSTER_NAME":        cluster.Name,
+					"KUBETMUXP_CLUSTER_LOCATION":    cluster.Location,
+					"KUBETMUXP_CLUSTER_IS_REGIONAL": fmt.Sprintf("%v", cluster.IsRegional),
+					"GCP_PROJECT_ID":                projectId,
 				}
 				kubetmuxpClusters = append(kubetmuxpClusters, kubetmuxp.Cluster{
 					Name:    cluster.Name,

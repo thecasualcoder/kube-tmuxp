@@ -160,3 +160,13 @@ func NewConfig(cfgFile string, fs filesystem.FileSystem, kubeCfg kubeconfig.Kube
 
 	return cfg, nil
 }
+
+// NewConfig creates a new kube-tmuxp Config for the given projects
+func NewConfigWithProjects(projects Projects, fs filesystem.FileSystem, kubeCfg kubeconfig.KubeConfig) (Config, error) {
+	cfg := Config{
+		filesystem: fs,
+		kubeCfg:    kubeCfg,
+		Projects:   projects,
+	}
+	return cfg, nil
+}

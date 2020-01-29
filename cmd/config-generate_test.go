@@ -45,12 +45,14 @@ func Test_mergeEnvs(t *testing.T) {
 		result := mergeEnvs(map[string]string{
 			"key": "someValue",
 		}, map[string]string{
-			"key1": "$SOME_KEY",
+			"key1": "$SOME_KEY$SOME_KEY",
+			"key2": "$key$SOME_KEY",
 		})
 
 		assert.Equal(t, map[string]string{
 			"key":  "someValue",
-			"key1": "someEnvValue",
+			"key1": "someEnvValuesomeEnvValue",
+			"key2": "someValuesomeEnvValue",
 		}, result)
 	})
 }

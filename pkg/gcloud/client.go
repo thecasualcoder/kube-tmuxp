@@ -1,29 +1,30 @@
 package gcloud
 
 import (
-	"cloud.google.com/go/container/apiv1"
-	"context"
-	"fmt"
-	"google.golang.org/api/cloudresourcemanager/v1"
-	container2 "google.golang.org/genproto/googleapis/container/v1"
+	"encoding/json"
+	"github.com/thecasualcoder/kube-tmuxp/pkg/commander"
 )
 
 // ListProjects lists the projects for logged-in user
-func ListProjects() ([]string, error) {
-	newService, err := cloudresourcemanager.NewService(context.TODO())
+func ListProjects(commander commander.Commander) ([]string, error) {
+	args := []string{
+		"projects",
+		"list",
+		"--format=json",
+	}
+	response, err := commander.Execute("gcloud", args, nil)
 	if err != nil {
 		return nil, err
 	}
-	projectsService := cloudresourcemanager.NewProjectsService(newService)
-
-	response, err := projectsService.List().Do()
+	var parsedResponse []map[string]string
+	err = json.Unmarshal([]byte(response), &parsedResponse)
 	if err != nil {
 		return nil, err
 	}
 
-	projectIds := make([]string, 0, len(response.Projects))
-	for _, project := range response.Projects {
-		projectIds = append(projectIds, project.ProjectId)
+	projectIds := make([]string, 0, len(parsedResponse))
+	for _, project := range parsedResponse {
+		projectIds = append(projectIds, project["projectId"])
 	}
 
 	return projectIds, nil
@@ -31,30 +32,38 @@ func ListProjects() ([]string, error) {
 
 // Cluster represent the GKE Cluster
 type Cluster struct {
-	Name       string
-	Location   string
-	IsRegional bool
+	Name      string
+	Location  string
+	Locations []string
+}
+
+func (cluster Cluster) IsRegional() bool {
+	return Contains(cluster.Locations, cluster.Location)
 }
 
 // Clusters represents the list of Cluster
 type Clusters []Cluster
 
 // ListClusters for the given projectId
-func ListClusters(projectId string) (Clusters, error) {
-	clusterManagerClient, err := container.NewClusterManagerClient(context.TODO())
+func ListClusters(cmdr commander.Commander, projectId string) (Clusters, error) {
+	args := []string{
+		"container",
+		"clusters",
+		"list",
+		"--project",
+		projectId,
+		"--format=json",
+	}
+	response, err := cmdr.Execute("gcloud", args, nil)
+	if err != nil {
+		return nil, err
+	}
+	var clusters []Cluster
+	err = json.Unmarshal([]byte(response), &clusters)
 	if err != nil {
 		return nil, err
 	}
 
-	listClustersRequest := container2.ListClustersRequest{Parent: fmt.Sprintf("projects/%s/locations/%s", projectId, "-")}
-	response, err := clusterManagerClient.ListClusters(context.TODO(), &listClustersRequest)
-	if err != nil {
-		return nil, err
-	}
-	clusters := make(Clusters, 0, len(response.Clusters))
-	for _, cluster := range response.Clusters {
-		clusters = append(clusters, Cluster{Name: cluster.Name, Location: cluster.Location, IsRegional: !Contains(cluster.Locations, cluster.Location)})
-	}
 	return clusters, nil
 }
 

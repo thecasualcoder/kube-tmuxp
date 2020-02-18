@@ -20,7 +20,8 @@ var gcloudGenerateCmd = &cobra.Command{
 	Use:   "gcloud-generate",
 	Short: "Generates configs for kube-tmuxp based on gcloud account",
 	Run: func(cmd *cobra.Command, args []string) {
-		projects, err := getProjects()
+		cmdr := &commander.Default{}
+		projects, err := getProjects(cmdr)
 		if err != nil {
 			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), err.Error())
 			os.Exit(1)
@@ -30,7 +31,7 @@ var gcloudGenerateCmd = &cobra.Command{
 			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Run with --apply to directly generate tmuxp configs for various Kubernetes contexts\n")
 			return
 		}
-		err = generateKubeTmuxpFiles(projects)
+		err = generateKubeTmuxpFiles(cmdr, projects)
 		if err != nil {
 			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), err.Error())
 			os.Exit(1)
@@ -38,9 +39,8 @@ var gcloudGenerateCmd = &cobra.Command{
 	},
 }
 
-func generateKubeTmuxpFiles(projects kubetmuxp.Projects) error {
+func generateKubeTmuxpFiles(cmdr commander.Commander, projects kubetmuxp.Projects) error {
 	fs := &filesystem.Default{}
-	cmdr := &commander.Default{}
 	kubeCfg, err := kubeconfig.New(fs, cmdr)
 
 	config, err := kubetmuxp.NewConfigWithProjects(projects, fs, kubeCfg)
@@ -59,8 +59,8 @@ func printConfigFiles(projects kubetmuxp.Projects, outStream io.Writer) {
 	fmt.Println(string(bytes))
 }
 
-func getProjects() (kubetmuxp.Projects, error) {
-	projectIds := getGCloudProjects(allProjects)
+func getProjects(cmdr commander.Commander) (kubetmuxp.Projects, error) {
+	projectIds := getGCloudProjects(cmdr, allProjects)
 	additionalEnvsMap := map[string]string{}
 	for _, env := range additionalEnvs {
 		envKeyValue := strings.Split(env, "=")
@@ -71,7 +71,7 @@ func getProjects() (kubetmuxp.Projects, error) {
 	}
 	projects := make(kubetmuxp.Projects, 0, len(projectIds))
 	for _, projectId := range projectIds {
-		clusters, err := gcloud.ListClusters(projectId)
+		clusters, err := gcloud.ListClusters(cmdr, projectId)
 		if err != nil {
 			return nil, err
 		}
@@ -81,7 +81,8 @@ func getProjects() (kubetmuxp.Projects, error) {
 		for _, cluster := range clusters {
 			zone := ""
 			region := ""
-			if cluster.IsRegional {
+			isRegional := cluster.IsRegional()
+			if isRegional {
 				region = cluster.Location
 			} else {
 				zone = cluster.Location
@@ -89,7 +90,7 @@ func getProjects() (kubetmuxp.Projects, error) {
 			baseEnvs := map[string]string{
 				"KUBETMUXP_CLUSTER_NAME":        cluster.Name,
 				"KUBETMUXP_CLUSTER_LOCATION":    cluster.Location,
-				"KUBETMUXP_CLUSTER_IS_REGIONAL": fmt.Sprintf("%v", cluster.IsRegional),
+				"KUBETMUXP_CLUSTER_IS_REGIONAL": fmt.Sprintf("%v", isRegional),
 				"GCP_PROJECT_ID":                projectId,
 			}
 			kubetmuxpClusters = append(kubetmuxpClusters, kubetmuxp.Cluster{
@@ -123,8 +124,8 @@ func mergeEnvs(base, additionalEnvsMap map[string]string) map[string]string {
 	return base
 }
 
-func getGCloudProjects(allProjects bool) []string {
-	projectIds, err := gcloud.ListProjects()
+func getGCloudProjects(cmdr commander.Commander, allProjects bool) []string {
+	projectIds, err := gcloud.ListProjects(cmdr)
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

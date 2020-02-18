@@ -7,7 +7,6 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var cfgFile string
@@ -27,7 +26,6 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
 	home, err := homedir.Dir()
 	if err != nil {
 		fmt.Println(err)
@@ -36,14 +34,4 @@ func init() {
 	configFileName := ".kube-tmuxp.yaml"
 	cfgFile = path.Join(home, configFileName)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", cfgFile, "config file")
-}
-
-func initConfig() {
-	viper.SetConfigFile(cfgFile)
-
-	viper.AutomaticEnv()
-
-	if err := viper.ReadInConfig(); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, fmt.Sprintf("error reading config file %s: %v", viper.ConfigFileUsed(), err))
-	}
 }

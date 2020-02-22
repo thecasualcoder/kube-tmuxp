@@ -66,7 +66,7 @@ type Cluster struct {
 }
 
 func (cluster Cluster) IsRegional() bool {
-	return Contains(cluster.Locations, cluster.Location)
+	return !Contains(cluster.Locations, cluster.Location)
 }
 
 // Clusters represents the list of Cluster

@@ -173,3 +173,17 @@ func TestProjects_Filter(t *testing.T) {
 
 	assert.Equal(t, Projects{Project{ProjectId: "project_one"}}, projects.Filter([]string{"project_one", "invalid_project"}))
 }
+
+func TestCluster_IsRegional(t *testing.T) {
+	t.Run("should return true for regional clusters", func(t *testing.T) {
+		cluster := Cluster{Name: "cluster-one", Location: "asia-southeast1", Locations: []string{"asia-southeast1-a", "asia-southeast1-c", "asia-southeast1-b"}}
+
+		assert.True(t, cluster.IsRegional())
+	})
+
+	t.Run("should return false for zonal clusters", func(t *testing.T) {
+		cluster := Cluster{Name: "cluster-one", Location: "asia-southeast1-a", Locations: []string{"asia-southeast1-a", "asia-southeast1-c", "asia-southeast1-b"}}
+
+		assert.False(t, cluster.IsRegional())
+	})
+}

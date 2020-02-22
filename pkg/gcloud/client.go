@@ -8,7 +8,7 @@ import (
 )
 
 // ListProjects lists the projects for logged-in user
-func ListProjects(commander commander.Commander) ([]string, error) {
+func ListProjects(commander commander.Commander) (Projects, error) {
 	args := []string{
 		"projects",
 		"list",
@@ -19,18 +19,43 @@ func ListProjects(commander commander.Commander) ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error executing %s: %v", fullCommand, err)
 	}
-	var parsedResponse []map[string]string
-	err = json.Unmarshal([]byte(response), &parsedResponse)
+	var projects []Project
+	err = json.Unmarshal([]byte(response), &projects)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshaling the response from command %s: %v", fullCommand, err)
 	}
 
-	projectIds := make([]string, 0, len(parsedResponse))
-	for _, project := range parsedResponse {
-		projectIds = append(projectIds, project["projectId"])
-	}
+	return projects, nil
+}
 
-	return projectIds, nil
+// Project represent the GCP project
+type Project struct {
+	ProjectId string `json:"projectId"`
+}
+
+// Projects represent the list of GCP projects
+type Projects []Project
+
+func (p Projects) IDs() []string {
+	acc := make([]string, 0, len(p))
+	for _, project := range p {
+		acc = append(acc, project.ProjectId)
+	}
+	return acc
+}
+
+func (p Projects) Filter(projectIDs []string) Projects {
+	projectMap := map[string]Project{}
+	for _, project := range p {
+		projectMap[project.ProjectId] = project
+	}
+	result := make(Projects, 0, len(p))
+	for _, id := range projectIDs {
+		if project, ok := projectMap[id]; ok {
+			result = append(result, project)
+		}
+	}
+	return result
 }
 
 // Cluster represent the GKE Cluster

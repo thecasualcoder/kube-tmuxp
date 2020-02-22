@@ -60,7 +60,7 @@ func printConfigFiles(projects kubetmuxp.Projects, outStream io.Writer) {
 }
 
 func getProjects(cmdr commander.Commander) (kubetmuxp.Projects, error) {
-	projectIds := getGCloudProjects(cmdr, allProjects)
+	gCloudProjects := getGCloudProjects(cmdr, allProjects)
 	additionalEnvsMap := map[string]string{}
 	for _, env := range additionalEnvs {
 		envKeyValue := strings.Split(env, "=")
@@ -69,13 +69,13 @@ func getProjects(cmdr commander.Commander) (kubetmuxp.Projects, error) {
 		}
 		additionalEnvsMap[envKeyValue[0]] = envKeyValue[1]
 	}
-	projects := make(kubetmuxp.Projects, 0, len(projectIds))
-	for _, projectId := range projectIds {
-		clusters, err := gcloud.ListClusters(cmdr, projectId)
+	projects := make(kubetmuxp.Projects, 0, len(gCloudProjects))
+	for _, gCloudProject := range gCloudProjects {
+		clusters, err := gcloud.ListClusters(cmdr, gCloudProject.ProjectId)
 		if err != nil {
 			return nil, err
 		}
-		_, _ = fmt.Fprintf(os.Stderr, "Number of clusters for %s project: %d\n", projectId, len(clusters))
+		_, _ = fmt.Fprintf(os.Stderr, "Number of clusters for %s project: %d\n", gCloudProject, len(clusters))
 
 		kubetmuxpClusters := make(kubetmuxp.Clusters, 0, len(clusters))
 		for _, cluster := range clusters {
@@ -91,7 +91,7 @@ func getProjects(cmdr commander.Commander) (kubetmuxp.Projects, error) {
 				"KUBETMUXP_CLUSTER_NAME":        cluster.Name,
 				"KUBETMUXP_CLUSTER_LOCATION":    cluster.Location,
 				"KUBETMUXP_CLUSTER_IS_REGIONAL": fmt.Sprintf("%v", isRegional),
-				"GCP_PROJECT_ID":                projectId,
+				"GCP_PROJECT_ID":                gCloudProject.ProjectId,
 			}
 			kubetmuxpClusters = append(kubetmuxpClusters, kubetmuxp.Cluster{
 				Name:    cluster.Name,
@@ -102,7 +102,7 @@ func getProjects(cmdr commander.Commander) (kubetmuxp.Projects, error) {
 			})
 		}
 		projects = append(projects, kubetmuxp.Project{
-			Name:     projectId,
+			Name:     gCloudProject.ProjectId,
 			Clusters: kubetmuxpClusters,
 		})
 	}
@@ -124,37 +124,41 @@ func mergeEnvs(base, additionalEnvsMap map[string]string) map[string]string {
 	return base
 }
 
-func getGCloudProjects(cmdr commander.Commander, allProjects bool) []string {
-	projectIds, err := gcloud.ListProjects(cmdr)
+func getGCloudProjects(cmdr commander.Commander, allProjects bool) gcloud.Projects {
+	projects, err := gcloud.ListProjects(cmdr)
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	_, _ = fmt.Fprintf(os.Stderr, "Number of gcloud projects: %d\n", len(projectIds))
+	_, _ = fmt.Fprintf(os.Stderr, "Number of gcloud projects: %d\n", len(projects))
 	if allProjects {
-		return projectIds
+		return projects
 	}
-	selectedProjectIds, err := getSelectedProjects(projectIds)
+	selectedProjects, err := getSelectedProjects(projects)
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	_, _ = fmt.Fprintf(os.Stderr, "Number of selected gcloud projects: %d\n", len(selectedProjectIds))
-	return selectedProjectIds
+	_, _ = fmt.Fprintf(os.Stderr, "Number of selected gcloud projects: %d\n", len(selectedProjects))
+	return selectedProjects
 }
 
-func getSelectedProjects(projects []string) ([]string, error) {
-	var selectedProjects []string
+func getSelectedProjects(projects gcloud.Projects) (gcloud.Projects, error) {
+	var selectedProjectIDs []string
 	prompt := &survey.MultiSelect{
 		Message: "Select gcloud projects that you want to configure:",
-		Options: projects,
+		Options: projects.IDs(),
 	}
 	opt := func(options *survey.AskOptions) error {
 		options.Stdio.Out = os.Stderr
 		return nil
 	}
-	err := survey.AskOne(prompt, &selectedProjects, func(ans interface{}) error { return nil }, opt)
-	return selectedProjects, err
+	validator := func(ans interface{}) error { return nil }
+	err := survey.AskOne(prompt, &selectedProjectIDs, validator, opt)
+	if err != nil {
+		return nil, fmt.Errorf("error selecting project: %v", err)
+	}
+	return projects.Filter(selectedProjectIDs), nil
 }
 
 var allProjects, apply bool

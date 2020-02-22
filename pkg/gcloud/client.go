@@ -2,7 +2,9 @@ package gcloud
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/commander"
+	"strings"
 )
 
 // ListProjects lists the projects for logged-in user
@@ -13,13 +15,14 @@ func ListProjects(commander commander.Commander) ([]string, error) {
 		"--format=json",
 	}
 	response, err := commander.Execute("gcloud", args, nil)
+	fullCommand := strings.Join(append([]string{"gcloud"}, args...), " ")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error executing %s: %v", fullCommand, err)
 	}
 	var parsedResponse []map[string]string
 	err = json.Unmarshal([]byte(response), &parsedResponse)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error unmarshaling the response from command %s: %v", fullCommand, err)
 	}
 
 	projectIds := make([]string, 0, len(parsedResponse))
@@ -55,13 +58,14 @@ func ListClusters(cmdr commander.Commander, projectId string) (Clusters, error) 
 		"--format=json",
 	}
 	response, err := cmdr.Execute("gcloud", args, nil)
+	fullCommand := strings.Join(append([]string{"gcloud"}, args...), " ")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error executing %s: %v", fullCommand, err)
 	}
 	var clusters []Cluster
 	err = json.Unmarshal([]byte(response), &clusters)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error unmarshaling the response from command %s: %v", fullCommand, err)
 	}
 
 	return clusters, nil

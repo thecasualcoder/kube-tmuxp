@@ -13,7 +13,7 @@ func TestListProjects(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		commander := mock.NewCommander(ctrl)
-		commander.EXPECT().Execute("gcloud", []string{"projects", "list", "--format=json",}, nil).Return("", fmt.Errorf("please login"))
+		commander.EXPECT().Execute("gcloud", []string{"projects", "list", "--format=json"}, nil).Return("", fmt.Errorf("please login"))
 
 		projects, err := ListProjects(commander)
 
@@ -25,7 +25,7 @@ func TestListProjects(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		commander := mock.NewCommander(ctrl)
-		commander.EXPECT().Execute("gcloud", []string{"projects", "list", "--format=json",}, nil).Return("invalid json response", nil)
+		commander.EXPECT().Execute("gcloud", []string{"projects", "list", "--format=json"}, nil).Return("invalid json response", nil)
 
 		projects, err := ListProjects(commander)
 
@@ -37,20 +37,23 @@ func TestListProjects(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		commander := mock.NewCommander(ctrl)
-		commander.EXPECT().Execute("gcloud", []string{"projects", "list", "--format=json",}, nil).Return(`[
+		commander.EXPECT().Execute("gcloud", []string{"projects", "list", "--format=json"}, nil).Return(`[
   {
     "createTime": "2016-08-20T04:30:54.605Z",
     "lifecycleState": "ACTIVE",
     "name": "My Project",
     "projectId": "clean-pottery",
-    "projectNumber": "10"
+    "projectNumber": "10",
+	"users": [
+		"someuser"
+	]
   }
 ]`, nil)
 
 		projects, err := ListProjects(commander)
 
 		assert.NoError(t, err)
-		assert.Equal(t, []string{"clean-pottery"}, projects)
+		assert.Equal(t, Projects{Project{ProjectId: "clean-pottery"}}, projects)
 	})
 }
 
@@ -157,4 +160,16 @@ func TestListClusters(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, expectedClusters, projects)
 	})
+}
+
+func TestProjects_IDs(t *testing.T) {
+	projects := Projects{Project{ProjectId: "project_one"}, Project{ProjectId: "project_two"}}
+
+	assert.Equal(t, []string{"project_one", "project_two"}, projects.IDs())
+}
+
+func TestProjects_Filter(t *testing.T) {
+	projects := Projects{Project{ProjectId: "project_one"}, Project{ProjectId: "project_two"}}
+
+	assert.Equal(t, Projects{Project{ProjectId: "project_one"}}, projects.Filter([]string{"project_one", "invalid_project"}))
 }

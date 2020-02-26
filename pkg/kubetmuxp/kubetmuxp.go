@@ -125,6 +125,9 @@ func (c *Config) Process() error {
 		for _, cluster := range project.Clusters {
 			kubeCfgFile := path.Join(kubeCfgsDir, cluster.Context)
 
+			if project.Provider == "" {
+				project.Provider = "gke"
+			}
 			fmt.Printf("Provider: %s\n", project.Provider)
 			fmt.Printf("Cluster: %s\n", cluster.Name)
 			fmt.Println("Deleting exisiting context...")

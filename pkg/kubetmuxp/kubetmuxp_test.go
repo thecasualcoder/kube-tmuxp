@@ -7,9 +7,9 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/internal/mock"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/kubeconfig"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/kubetmuxp"
+	"github.com/jfreeland/kube-tmuxp/pkg/internal/mock"
+	"github.com/jfreeland/kube-tmuxp/pkg/kubeconfig"
+	"github.com/jfreeland/kube-tmuxp/pkg/kubetmuxp"
 )
 
 func getKubeCfg(ctrl *gomock.Controller) kubeconfig.KubeConfig {
@@ -60,7 +60,7 @@ projects:
     zone: test-zone
     region: test-region
     context: test-ctx
-    envs:
+    tmux_envs:
       TEST_ENV: test-value`
 		reader := strings.NewReader(content)
 		mockFS.EXPECT().Open("kube-tmuxp-config.yaml").Return(reader, nil)
@@ -75,7 +75,7 @@ projects:
 						Zone:    "test-zone",
 						Region:  "test-region",
 						Context: "test-ctx",
-						Envs: kubetmuxp.Envs{
+						TmuxEnvs: kubetmuxp.TmuxEnvs{
 							"TEST_ENV": "test-value",
 						},
 					},
@@ -144,7 +144,7 @@ func TestGeneratedContextName(t *testing.T) {
 			Region: "test-region",
 		}
 
-		name, err := cluster.DefaultContextName("test-project")
+		name, err := cluster.DefaultGKEContextName("test-project")
 
 		assert.Nil(t, err)
 		assert.Equal(t, "gke_test-project_test-region_test-cluster", name)
@@ -156,7 +156,7 @@ func TestGeneratedContextName(t *testing.T) {
 			Zone: "test-zone",
 		}
 
-		name, err := cluster.DefaultContextName("test-project")
+		name, err := cluster.DefaultGKEContextName("test-project")
 
 		assert.Nil(t, err)
 		assert.Equal(t, "gke_test-project_test-zone_test-cluster", name)
@@ -169,7 +169,7 @@ func TestGeneratedContextName(t *testing.T) {
 			Zone:   "test-zone",
 		}
 
-		_, err := cluster.DefaultContextName("test-project")
+		_, err := cluster.DefaultGKEContextName("test-project")
 
 		assert.EqualError(t, err, "Only one of region or zone should be given")
 	})

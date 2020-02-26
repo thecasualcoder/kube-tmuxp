@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/commander"
+	"github.com/jfreeland/kube-tmuxp/pkg/commander"
 )
 
 func TestExecute(t *testing.T) {

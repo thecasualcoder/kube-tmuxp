@@ -5,26 +5,39 @@ import (
 	"io/ioutil"
 	"path"
 
-	"github.com/thecasualcoder/kube-tmuxp/pkg/filesystem"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/kubeconfig"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/tmuxp"
+	"github.com/jfreeland/kube-tmuxp/pkg/filesystem"
+	"github.com/jfreeland/kube-tmuxp/pkg/kubeconfig"
+	"github.com/jfreeland/kube-tmuxp/pkg/tmuxp"
 	yamlV2 "gopkg.in/yaml.v2"
 )
 
-// Envs reprensents environemnt variables
-type Envs map[string]string
+// Role represents a Role ARN required to connect to an EKS cluster
+type Role string
+
+// ProviderEnvs represents environment variables for the provider
+type ProviderEnvs map[string]string
+
+// Envs reprensents environemnt variables for Tmux
+type TmuxEnvs map[string]string
 
 //Cluster represents a Kubernetes cluster
 type Cluster struct {
-	Name    string `yaml:"name"`
-	Zone    string `yaml:"zone"`
-	Region  string `yaml:"region"`
-	Context string `yaml:"context"`
-	Envs    `yaml:"envs"`
+	Name         string `yaml:"name"`
+	Zone         string `yaml:"zone"`
+	Region       string `yaml:"region"`
+	Context      string `yaml:"context"`
+	Role         string `yaml:"role"`
+	TmuxEnvs     `yaml:"tmux_envs"`
+	ProviderEnvs `yaml:"provider_envs"`
 }
 
-// DefaultContextName returns default context name
-func (c *Cluster) DefaultContextName(project string) (string, error) {
+// DefaultEKSContextName returns default context name for EKS
+func (c *Cluster) DefaultEKSContextName(project string) (string, error) {
+	return fmt.Sprintf("arn:aws:eks:%s:%s:cluster/%s", c.Region, project, c.Name), nil
+}
+
+// DefaultGKEContextName returns default context name for GKE
+func (c *Cluster) DefaultGKEContextName(project string) (string, error) {
 	if regional, err := c.IsRegional(); err != nil {
 		return "", err
 	} else if regional {
@@ -52,6 +65,7 @@ type Clusters []Cluster
 
 //Project represents a cloud project
 type Project struct {
+	Provider string `yaml:"provider"`
 	Name     string `yaml:"name"`
 	Clusters `yaml:"clusters"`
 }
@@ -88,7 +102,7 @@ func (c *Config) load(cfgFile string) error {
 func (c *Config) saveTmuxpConfig(kubeCfgFile string, cluster Cluster) error {
 	windows := tmuxp.Windows{{Name: "default"}}
 	env := tmuxp.Environment{"KUBECONFIG": kubeCfgFile}
-	for k, v := range cluster.Envs {
+	for k, v := range cluster.TmuxEnvs {
 		env[k] = v
 	}
 
@@ -111,6 +125,10 @@ func (c *Config) Process() error {
 		for _, cluster := range project.Clusters {
 			kubeCfgFile := path.Join(kubeCfgsDir, cluster.Context)
 
+			if project.Provider == "" {
+				project.Provider = "gke"
+			}
+			fmt.Printf("Provider: %s\n", project.Provider)
 			fmt.Printf("Cluster: %s\n", cluster.Name)
 			fmt.Println("Deleting exisiting context...")
 			if err := c.kubeCfg.Delete(kubeCfgFile); err != nil {
@@ -118,24 +136,44 @@ func (c *Config) Process() error {
 			}
 
 			fmt.Println("Adding context...")
-			if regional, err := cluster.IsRegional(); err != nil {
-				return err
-			} else if regional {
-				if err := c.kubeCfg.AddRegionalCluster(project.Name, cluster.Name, cluster.Region, kubeCfgFile); err != nil {
+			if project.Provider == "gke" {
+				if regional, err := cluster.IsRegional(); err != nil {
 					return err
+				} else if regional {
+					if err := c.kubeCfg.AddRegionalGKECluster(project.Name, cluster.Name, cluster.Region, kubeCfgFile); err != nil {
+						return err
+					}
+				} else {
+					if err := c.kubeCfg.AddZonalGKECluster(project.Name, cluster.Name, cluster.Zone, kubeCfgFile); err != nil {
+						return err
+					}
+				}
+			} else if project.Provider == "eks" {
+				if regional, err := cluster.IsRegional(); err != nil {
+					return err
+				} else if regional {
+					if err := c.kubeCfg.AddRegionalEKSCluster(cluster.Name, cluster.Region, cluster.Role, cluster.ProviderEnvs, kubeCfgFile); err != nil {
+						return err
+					}
 				}
 			} else {
-				if err := c.kubeCfg.AddZonalCluster(project.Name, cluster.Name, cluster.Zone, kubeCfgFile); err != nil {
-					return err
-				}
+				return fmt.Errorf("Provider must be gke or eks")
 			}
 
 			fmt.Println("Renaming context...")
-			defaultCtxName, err := cluster.DefaultContextName(project.Name)
-			if err != nil {
-				return err
+			if project.Provider == "gke" {
+				defaultCtxName, err := cluster.DefaultGKEContextName(project.Name)
+				if err != nil {
+					return err
+				}
+				c.kubeCfg.RenameContext(defaultCtxName, cluster.Context, kubeCfgFile)
+			} else if project.Provider == "eks" {
+				defaultCtxName, err := cluster.DefaultEKSContextName(project.Name)
+				if err != nil {
+					return err
+				}
+				c.kubeCfg.RenameContext(defaultCtxName, cluster.Context, kubeCfgFile)
 			}
-			c.kubeCfg.RenameContext(defaultCtxName, cluster.Context, kubeCfgFile)
 
 			fmt.Println("Creating tmuxp config...")
 			c.saveTmuxpConfig(kubeCfgFile, cluster)

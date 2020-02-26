@@ -86,7 +86,7 @@ func TestDelete(t *testing.T) {
 	})
 }
 
-func TestAddRegionalCluster(t *testing.T) {
+func TestAddRegionalGKECluster(t *testing.T) {
 	t.Run("should invoke command for adding regional cluster", func(*testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -110,7 +110,7 @@ func TestAddRegionalCluster(t *testing.T) {
 		mockCmdr.EXPECT().Execute("gcloud", args, envs).Return("Context added successfully", nil)
 
 		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
-		err := kubeCfg.AddRegionalCluster("test-project", "test-cluster", "test-region", "/Users/test/.kube/configs/test-context")
+		err := kubeCfg.AddRegionalGKECluster("test-project", "test-cluster", "test-region", "/Users/test/.kube/configs/test-context")
 
 		assert.Nil(t, err)
 	})
@@ -138,13 +138,13 @@ func TestAddRegionalCluster(t *testing.T) {
 		mockCmdr.EXPECT().Execute("gcloud", args, envs).Return("", fmt.Errorf("some error"))
 
 		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
-		err := kubeCfg.AddRegionalCluster("test-project", "test-cluster", "test-region", "/Users/test/.kube/configs/test-context")
+		err := kubeCfg.AddRegionalGKECluster("test-project", "test-cluster", "test-region", "/Users/test/.kube/configs/test-context")
 
 		assert.EqualError(t, err, "some error")
 	})
 }
 
-func TestAddZonalCluster(t *testing.T) {
+func TestAddZonalGKECluster(t *testing.T) {
 	t.Run("should invoke command for adding zonal cluster", func(*testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -167,7 +167,7 @@ func TestAddZonalCluster(t *testing.T) {
 		mockCmdr.EXPECT().Execute("gcloud", args, envs).Return("Context added successfully", nil)
 
 		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
-		err := kubeCfg.AddZonalCluster("test-project", "test-cluster", "test-zone", "/Users/test/.kube/configs/test-context")
+		err := kubeCfg.AddZonalGKECluster("test-project", "test-cluster", "test-zone", "/Users/test/.kube/configs/test-context")
 
 		assert.Nil(t, err)
 	})
@@ -194,7 +194,7 @@ func TestAddZonalCluster(t *testing.T) {
 		mockCmdr.EXPECT().Execute("gcloud", args, envs).Return("", fmt.Errorf("some error"))
 
 		kubeCfg, _ := kubeconfig.New(mockFS, mockCmdr)
-		err := kubeCfg.AddZonalCluster("test-project", "test-cluster", "test-zone", "/Users/test/.kube/configs/test-context")
+		err := kubeCfg.AddZonalGKECluster("test-project", "test-cluster", "test-zone", "/Users/test/.kube/configs/test-context")
 
 		assert.EqualError(t, err, "some error")
 	})

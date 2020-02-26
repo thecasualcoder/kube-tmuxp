@@ -25,11 +25,54 @@ func (k *KubeConfig) Delete(kubeCfgFile string) error {
 	return nil
 }
 
-// AddRegionalCluster imports Kubernetes context for
+// AddRegionalEKSCluster imports Kubernetes context for a regional EKS cluster
+func (k *KubeConfig) AddRegionalEKSCluster(cluster string, region string, role string, env map[string]string, kubeCfgFile string) error {
+	var args []string
+	if len(role) > 0 {
+		args = []string{
+			"eks",
+			"update-kubeconfig",
+			"--name",
+			cluster,
+			"--kubeconfig",
+			kubeCfgFile,
+			"--region",
+			region,
+			"--role-arn",
+			role,
+		}
+	} else {
+		args = []string{
+			"eks",
+			"update-kubeconfig",
+			"--name",
+			cluster,
+			"--kubeconfig",
+			kubeCfgFile,
+			"--region",
+			region,
+		}
+	}
+
+	envs := []string{}
+	for k, v := range env {
+		envs = append(envs, k+"="+v)
+	}
+	if _, err := k.commander.Execute("aws", args, envs); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// AddRegionalGKECluster imports Kubernetes context for
 // a regional Kubernetes cluster
-func (k *KubeConfig) AddRegionalCluster(project string, cluster string, region string, kubeCfgFile string) error {
+func (k *KubeConfig) AddRegionalGKECluster(project string, cluster string, region string, kubeCfgFile string) error {
 	args := []string{
 		"beta",
+		// Is beta needed here?  You can run into an issue where if
+		// you haven't updated gcloud lately, beta will stop and
+		// report that it needs updated, but gcloud itself will not.
 		"container",
 		"clusters",
 		"get-credentials",
@@ -47,9 +90,9 @@ func (k *KubeConfig) AddRegionalCluster(project string, cluster string, region s
 	return nil
 }
 
-// AddZonalCluster imports Kubernetes context for
+// AddZonalGKECluster imports Kubernetes context for
 // a zonal Kubernetes cluster
-func (k *KubeConfig) AddZonalCluster(project string, cluster string, zone string, kubeCfgFile string) error {
+func (k *KubeConfig) AddZonalGKECluster(project string, cluster string, zone string, kubeCfgFile string) error {
 	args := []string{
 		"container",
 		"clusters",

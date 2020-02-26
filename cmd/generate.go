@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/commander"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/filesystem"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/kubeconfig"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/kubetmuxp"
+	"github.com/jfreeland/kube-tmuxp/pkg/commander"
+	"github.com/jfreeland/kube-tmuxp/pkg/filesystem"
+	"github.com/jfreeland/kube-tmuxp/pkg/kubeconfig"
+	"github.com/jfreeland/kube-tmuxp/pkg/kubetmuxp"
 )
 
 var generateCmd = &cobra.Command{

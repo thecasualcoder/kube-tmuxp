@@ -7,8 +7,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/internal/mock"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/tmuxp"
+	"github.com/jfreeland/kube-tmuxp/pkg/internal/mock"
+	"github.com/jfreeland/kube-tmuxp/pkg/tmuxp"
 )
 
 func TestNewConfig(t *testing.T) {

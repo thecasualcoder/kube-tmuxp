@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/lithammer/fuzzysearch/fuzzy"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/commander"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/filesystem"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/kubeconfig"
@@ -153,6 +154,15 @@ func getSelectedProjects(projects gcloud.Projects) (gcloud.Projects, error) {
 	prompt := &survey.MultiSelect{
 		Message: "Select gcloud projects that you want to configure:",
 		Options: projects.IDs(),
+		FilterFn: func(s string, options []string) []string {
+			var acc []string
+			for _, option := range options {
+				if fuzzy.Match(s, option) {
+					acc = append(acc, option)
+				}
+			}
+			return acc
+		},
 	}
 	opt := func(options *survey.AskOptions) error {
 		options.Stdio.Out = os.Stderr

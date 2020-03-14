@@ -60,7 +60,12 @@ func printConfigFiles(projects kubetmuxp.Projects, outStream io.Writer) {
 }
 
 func getProjects(cmdr commander.Commander) (kubetmuxp.Projects, error) {
-	gCloudProjects := getGCloudProjects(cmdr, allProjects)
+	var gCloudProjects gcloud.Projects
+	if projectID != "" {
+		gCloudProjects = gcloud.Projects{gcloud.Project{ProjectId: projectID}}
+	} else {
+		gCloudProjects = getGCloudProjects(cmdr, allProjects)
+	}
 	additionalEnvsMap := map[string]string{}
 	for _, env := range additionalEnvs {
 		envKeyValue := strings.Split(env, "=")
@@ -162,10 +167,12 @@ func getSelectedProjects(projects gcloud.Projects) (gcloud.Projects, error) {
 }
 
 var allProjects, apply bool
+var projectID string
 var additionalEnvs []string
 
 func init() {
 	gcloudGenerateCmd.Flags().BoolVar(&allProjects, "allProjects", false, "Skip confirmation for projects")
+	gcloudGenerateCmd.Flags().StringVar(&projectID, "projectID", "", "Project ID to which the configurations need to be fetched")
 	gcloudGenerateCmd.Flags().BoolVar(&apply, "apply", false, "Directly create the tmuxp configs for selected projects")
 	gcloudGenerateCmd.Flags().StringSliceVar(&additionalEnvs, "additionalEnvs", nil, "Additional envs to be populated")
 	rootCmd.AddCommand(gcloudGenerateCmd)

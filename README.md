@@ -59,6 +59,49 @@ kube-tmuxp gen
 
 Default config path is `$HOME/.kube-tmuxp.yaml`. If you are using a different path, then use the `--config` flag to specify that path. Refer `kube-tmuxp --help` for more details.
 
+## Generate kube-tmuxp config file for gcloud
+
+```bash
+$ kube-tmuxp gcloud-generate --help
+Generates configs for kube-tmuxp based on gcloud account
+
+Usage:
+  kube-tmuxp gcloud-generate [flags]
+
+Flags:
+      --additionalEnvs strings   Additional envs to be populated
+      --allProjects              Skip confirmation for projects
+      --apply                    Directly create the tmuxp configs for selected projects
+  -h, --help                     help for gcloud-generate
+      --projectIDs strings       Comma separated Project IDs to which the configurations need to be fetched
+
+```
+
+#### Examples:
+1) Interactively select projects:
+```bash
+$ kube-tmuxp gcloud-generate
+# this will prompt for the projectIDs selection. Type to filter and select using space
+# fuzzy search will work
+```
+2) Specify projectIDs:
+```bash
+$ kube-tmuxp gcloud-generate --projectIDs project1,project2
+```
+3) For all projects:
+```bash
+$ kube-tmuxp gcloud-generate --allProjects
+```
+4) Use env variables in kube-tmuxp:
+> kube-tmuxp provides four envs: `KUBETMUXP_CLUSTER_NAME`, `KUBETMUXP_CLUSTER_LOCATION`, `KUBETMUXP_CLUSTER_IS_REGIONAL`, `GCP_PROJECT_ID`. We can pass additional envs also.
+```bash
+$ kube-tmuxp gcloud-generate --additionalEnvs 'NEW_KEY=new_value,NEW_ENV=$HOME,KUBE_CONFIG=$HOME/.kube/configs/$KUBETMUXP_CLUSTER_NAME'
+# each tmux session will have 7 envs (4 predefined, 3 additionalEnvs passed as argument)
+```
+5) Directly create the kubeconfigs and tmuxp files (instead of kube-tmuxp config files):
+```bash
+$ kube-tmuxp gcloud-generate --apply
+```
 ## Start a session
 
 ```

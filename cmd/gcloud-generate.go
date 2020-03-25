@@ -182,9 +182,9 @@ var allProjects, apply bool
 var additionalEnvs, projectIDs []string
 
 func init() {
-	gcloudGenerateCmd.Flags().BoolVar(&allProjects, "allProjects", false, "Skip confirmation for projects")
-	gcloudGenerateCmd.Flags().StringSliceVar(&projectIDs, "projectIDs", nil, "Comma separated Project IDs to which the configurations need to be fetched")
+	gcloudGenerateCmd.Flags().BoolVar(&allProjects, "all-projects", false, "Skip confirmation for projects")
+	gcloudGenerateCmd.Flags().StringSliceVar(&projectIDs, "project-ids", nil, "Comma separated Project IDs to which the configurations need to be fetched")
 	gcloudGenerateCmd.Flags().BoolVar(&apply, "apply", false, "Directly create the tmuxp configs for selected projects")
-	gcloudGenerateCmd.Flags().StringSliceVar(&additionalEnvs, "additionalEnvs", nil, "Additional envs to be populated")
+	gcloudGenerateCmd.Flags().StringSliceVar(&additionalEnvs, "additional-envs", nil, "Additional envs to be populated")
 	rootCmd.AddCommand(gcloudGenerateCmd)
 }

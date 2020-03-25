@@ -69,11 +69,11 @@ Usage:
   kube-tmuxp gcloud-generate [flags]
 
 Flags:
-      --additionalEnvs strings   Additional envs to be populated
-      --allProjects              Skip confirmation for projects
+      --additional-envs strings   Additional envs to be populated
+      --all-projects              Skip confirmation for projects
       --apply                    Directly create the tmuxp configs for selected projects
   -h, --help                     help for gcloud-generate
-      --projectIDs strings       Comma separated Project IDs to which the configurations need to be fetched
+      --project-ids strings       Comma separated Project IDs to which the configurations need to be fetched
 
 ```
 

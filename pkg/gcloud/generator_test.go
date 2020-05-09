@@ -1,4 +1,4 @@
-package cmd
+package gcloud
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -56,3 +56,4 @@ func Test_mergeEnvs(t *testing.T) {
 		}, result)
 	})
 }
+

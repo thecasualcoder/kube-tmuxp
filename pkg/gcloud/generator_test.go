@@ -56,4 +56,3 @@ func Test_mergeEnvs(t *testing.T) {
 		}, result)
 	})
 }
-

@@ -2,14 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"path"
-
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"os"
 )
-
-var cfgFile string
 
 var rootCmd = &cobra.Command{
 	Use:   "kube-tmuxp",
@@ -23,15 +18,4 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-}
-
-func init() {
-	home, err := homedir.Dir()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	configFileName := ".kube-tmuxp.yaml"
-	cfgFile = path.Join(home, configFileName)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", cfgFile, "config file")
 }

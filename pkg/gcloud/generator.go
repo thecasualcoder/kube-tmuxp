@@ -1,4 +1,4 @@
-package cmd
+package gcloud
 
 import (
 	"fmt"
@@ -6,41 +6,50 @@ import (
 	"github.com/thecasualcoder/kube-tmuxp/pkg/commander"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/filesystem"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/kubeconfig"
+	"github.com/thecasualcoder/kube-tmuxp/pkg/kubetmuxp"
+	"gopkg.in/AlecAivazis/survey.v1"
 	"gopkg.in/yaml.v2"
 	"io"
 	"os"
 	"strings"
-
-	"github.com/spf13/cobra"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/gcloud"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/kubetmuxp"
-	"gopkg.in/AlecAivazis/survey.v1"
 )
 
-var gcloudGenerateCmd = &cobra.Command{
-	Use:   "gcloud-generate",
-	Short: "Generates configs for kube-tmuxp based on gcloud account",
-	Run: func(cmd *cobra.Command, args []string) {
-		cmdr := &commander.Default{}
-		projects, err := getProjects(cmdr)
-		if err != nil {
-			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), err.Error())
-			os.Exit(1)
-		}
-		if !apply {
-			printConfigFiles(projects, cmd.OutOrStdout())
-			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Run with --apply to directly generate tmuxp configs for various Kubernetes contexts\n")
-			return
-		}
-		err = generateKubeTmuxpFiles(cmdr, projects)
-		if err != nil {
-			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), err.Error())
-			os.Exit(1)
-		}
-	},
+type Generator struct {
+	projectIDs     []string
+	allProjects    bool
+	additionalEnvs []string
+	apply          bool
 }
 
-func generateKubeTmuxpFiles(cmdr commander.Commander, projects kubetmuxp.Projects) error {
+func NewGenerator(projectIDs []string, allProjects bool, additionalEnvs []string, apply bool) Generator {
+	return Generator{
+		projectIDs:     projectIDs,
+		allProjects:    allProjects,
+		additionalEnvs: additionalEnvs,
+		apply:          apply,
+	}
+}
+
+func (g Generator) Generate(outStream, errStream io.Writer) {
+	cmdr := &commander.Default{}
+	projects, err := g.getProjects(cmdr)
+	if err != nil {
+		_, _ = fmt.Fprintf(errStream, err.Error())
+		os.Exit(1)
+	}
+	if !g.apply {
+		g.printConfigFiles(projects, outStream)
+		_, _ = fmt.Fprintf(errStream, "Run with --apply to directly generate tmuxp configs for various Kubernetes contexts\n")
+		return
+	}
+	err = g.generateKubeTmuxpFiles(cmdr, projects)
+	if err != nil {
+		_, _ = fmt.Fprintf(errStream, err.Error())
+		os.Exit(1)
+	}
+}
+
+func (g Generator) generateKubeTmuxpFiles(cmdr commander.Commander, projects kubetmuxp.Projects) error {
 	fs := &filesystem.Default{}
 	kubeCfg, err := kubeconfig.New(fs, cmdr)
 
@@ -51,7 +60,7 @@ func generateKubeTmuxpFiles(cmdr commander.Commander, projects kubetmuxp.Project
 	return config.Process()
 }
 
-func printConfigFiles(projects kubetmuxp.Projects, outStream io.Writer) {
+func (g Generator) printConfigFiles(projects kubetmuxp.Projects, outStream io.Writer) {
 	bytes, err := yaml.Marshal(map[string]kubetmuxp.Projects{"projects": projects})
 	if err != nil {
 		_, _ = fmt.Fprintln(outStream, err)
@@ -60,17 +69,17 @@ func printConfigFiles(projects kubetmuxp.Projects, outStream io.Writer) {
 	fmt.Println(string(bytes))
 }
 
-func getProjects(cmdr commander.Commander) (kubetmuxp.Projects, error) {
-	gCloudProjects := gcloud.Projects{}
-	if projectIDs != nil && len(projectIDs) > 0 {
-		for _, projectID := range projectIDs {
-			gCloudProjects = append(gCloudProjects, gcloud.Project{ProjectId: projectID})
+func (g Generator) getProjects(cmdr commander.Commander) (kubetmuxp.Projects, error) {
+	gCloudProjects := Projects{}
+	if g.projectIDs != nil && len(g.projectIDs) > 0 {
+		for _, projectID := range g.projectIDs {
+			gCloudProjects = append(gCloudProjects, Project{ProjectId: projectID})
 		}
 	} else {
-		gCloudProjects = getGCloudProjects(cmdr, allProjects)
+		gCloudProjects = getGCloudProjects(cmdr, g.allProjects)
 	}
 	additionalEnvsMap := map[string]string{}
-	for _, env := range additionalEnvs {
+	for _, env := range g.additionalEnvs {
 		envKeyValue := strings.Split(env, "=")
 		if len(envKeyValue) != 2 {
 			return nil, fmt.Errorf("wrong env format: should be key=value")
@@ -79,7 +88,7 @@ func getProjects(cmdr commander.Commander) (kubetmuxp.Projects, error) {
 	}
 	projects := make(kubetmuxp.Projects, 0, len(gCloudProjects))
 	for _, gCloudProject := range gCloudProjects {
-		clusters, err := gcloud.ListClusters(cmdr, gCloudProject.ProjectId)
+		clusters, err := ListClusters(cmdr, gCloudProject.ProjectId)
 		if err != nil {
 			return nil, err
 		}
@@ -132,8 +141,8 @@ func mergeEnvs(base, additionalEnvsMap map[string]string) map[string]string {
 	return base
 }
 
-func getGCloudProjects(cmdr commander.Commander, allProjects bool) gcloud.Projects {
-	projects, err := gcloud.ListProjects(cmdr)
+func getGCloudProjects(cmdr commander.Commander, allProjects bool) Projects {
+	projects, err := ListProjects(cmdr)
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -151,7 +160,7 @@ func getGCloudProjects(cmdr commander.Commander, allProjects bool) gcloud.Projec
 	return selectedProjects
 }
 
-func getSelectedProjects(projects gcloud.Projects) (gcloud.Projects, error) {
+func getSelectedProjects(projects Projects) (Projects, error) {
 	var selectedProjectIDs []string
 	prompt := &survey.MultiSelect{
 		Message: "Select gcloud projects that you want to configure:",
@@ -176,15 +185,4 @@ func getSelectedProjects(projects gcloud.Projects) (gcloud.Projects, error) {
 		return nil, fmt.Errorf("error selecting project: %v", err)
 	}
 	return projects.Filter(selectedProjectIDs), nil
-}
-
-var allProjects, apply bool
-var additionalEnvs, projectIDs []string
-
-func init() {
-	gcloudGenerateCmd.Flags().BoolVar(&allProjects, "all-projects", false, "Skip confirmation for projects")
-	gcloudGenerateCmd.Flags().StringSliceVar(&projectIDs, "project-ids", nil, "Comma separated Project IDs to which the configurations need to be fetched")
-	gcloudGenerateCmd.Flags().BoolVar(&apply, "apply", false, "Directly create the tmuxp configs for selected projects")
-	gcloudGenerateCmd.Flags().StringSliceVar(&additionalEnvs, "additional-envs", nil, "Additional envs to be populated")
-	rootCmd.AddCommand(gcloudGenerateCmd)
 }

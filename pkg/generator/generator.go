@@ -2,11 +2,12 @@ package generator
 
 import (
 	"fmt"
+	"io"
+
 	"github.com/thecasualcoder/kube-tmuxp/pkg/commander"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/file"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/filesystem"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/gcloud"
-	"io"
 )
 
 type Generator interface {

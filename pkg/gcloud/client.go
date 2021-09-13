@@ -3,8 +3,9 @@ package gcloud
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/commander"
 	"strings"
+
+	"github.com/thecasualcoder/kube-tmuxp/pkg/commander"
 )
 
 // ListProjects lists the projects for logged-in user

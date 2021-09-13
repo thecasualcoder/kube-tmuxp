@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-homedir"
-	"github.com/thecasualcoder/kube-tmuxp/pkg/generator"
 	"os"
 	"path"
+
+	"github.com/mitchellh/go-homedir"
+	"github.com/thecasualcoder/kube-tmuxp/pkg/generator"
 
 	"github.com/spf13/cobra"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/commander"

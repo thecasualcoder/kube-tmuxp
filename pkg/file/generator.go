@@ -2,12 +2,13 @@ package file
 
 import (
 	"fmt"
+	"io"
+	"os"
+
 	"github.com/thecasualcoder/kube-tmuxp/pkg/commander"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/filesystem"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/kubeconfig"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/kubetmuxp"
-	"io"
-	"os"
 )
 
 type Generator struct {

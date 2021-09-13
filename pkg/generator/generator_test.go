@@ -1,10 +1,11 @@
 package generator
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/file"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/gcloud"
-	"testing"
 )
 
 func TestNewGenerator(t *testing.T) {

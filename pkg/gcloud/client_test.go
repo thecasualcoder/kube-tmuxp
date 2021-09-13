@@ -2,10 +2,11 @@ package gcloud
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/internal/mock"
-	"testing"
 )
 
 func TestListProjects(t *testing.T) {

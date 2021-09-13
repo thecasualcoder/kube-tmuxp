@@ -2,6 +2,10 @@ package gcloud
 
 import (
 	"fmt"
+	"io"
+	"os"
+	"strings"
+
 	"github.com/lithammer/fuzzysearch/fuzzy"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/commander"
 	"github.com/thecasualcoder/kube-tmuxp/pkg/filesystem"
@@ -9,9 +13,6 @@ import (
 	"github.com/thecasualcoder/kube-tmuxp/pkg/kubetmuxp"
 	"gopkg.in/AlecAivazis/survey.v1"
 	"gopkg.in/yaml.v2"
-	"io"
-	"os"
-	"strings"
 )
 
 type Generator struct {
